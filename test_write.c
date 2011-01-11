@@ -9,7 +9,7 @@ extern unsigned int sdm_radius;
 int main(int argv, char **argc) {
 	bitstring* address;
 	bitstring* data;
-	int i, lo, hi;
+	bitstring* read;
 
 	if (argv == 4) {
 		bs_dimension = atoi(argc[1]);
@@ -21,19 +21,19 @@ int main(int argv, char **argc) {
 	hl_initialize();
 	sdm_initialize();
 
-	//printf("All initialized.\n\n");
+	printf("All initialized.\n\n");
 
 	printf("%d %d %d\n", bs_dimension, sdm_sample, sdm_radius);
 
 	address = bs_init_random(bs_alloc());
 	data = bs_init_random(bs_alloc());
 
-	lo = 0;
-	hi = bs_dimension;
-	for(i=lo; i<=hi; i++) {
-		sdm_radius = i;
-		sdm_write(address, data);
-		fflush(stdout);
+	sdm_write(address, data);
+	read = sdm_read(address);
+
+	if (read != NULL) {
+		bs_print(data);
+		bs_print(read);
 	}
 
 	return 0;

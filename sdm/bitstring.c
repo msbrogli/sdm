@@ -6,7 +6,7 @@
 #include "bitstring.h"
 
 // Number of dimension in our memory space.
-const unsigned int bs_dimension = 1000;
+unsigned int bs_dimension = 1000;
 
 // Number of steps when iterating over bitstring.
 unsigned int bs_len;
@@ -93,6 +93,15 @@ bitstring* bs_init_random(bitstring* a) {
 	return a;
 }
 
+bitstring* bs_init_adder(bitstring* a, adder_t *adder) {
+	unsigned int i;
+	for(i=0; i<bs_dimension; i++) {
+		if(adder[i] >= 0) bs_bitset(a, i);
+		else bs_bitclear(a, i);
+	}
+	return a;
+}
+
 unsigned int bs_distance(bitstring* a, bitstring* b) {
 	unsigned int i, j, n, dist;
 	uint64_t c;
@@ -111,5 +120,29 @@ unsigned int bs_distance(bitstring* a, bitstring* b) {
 	}
 	bs_trace("bs_distance = %d\n", dist);
 	return dist;
+}
+
+int bs_bitsign(bitstring* a, int bit) {
+	int i = bit/8, j = bit%8;
+	return (a[i]&(1<<j) ? 1 : -1);
+}
+
+void bs_bitset(bitstring* a, int bit) {
+	int i = bit/8, j = bit%8;
+	a[i] |= (1<<j);
+}
+
+void bs_bitclear(bitstring* a, int bit) {
+	int i = bit/8, j = bit%8;
+	a[i] &= ~(1<<j);
+}
+
+void bs_print(bitstring* a) {
+	int i;
+	printf("0x");
+	for(i=0; i<bs_len; i++) {
+		printf("%llx", a[i]);
+	}
+	printf("\n");
 }
 
