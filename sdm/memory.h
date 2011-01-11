@@ -3,6 +3,7 @@
 
 #include <stdint.h>
 
+#include "common.h"
 #include "bitstring.h"
 #include "hardlocation.h"
 

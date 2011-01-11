@@ -3,12 +3,7 @@
 
 #include <stdint.h>
 
-#include "bitstring.h"
-
-typedef struct {
-	bitstring* address;
-	uint8_t* adder;
-} hardlocation;
+#include "common.h"
 
 int hl_initialize();
 

@@ -3,9 +3,9 @@
 
 #include <stdint.h>
 
-#define BS_DEBUG
+#include "common.h"
 
-typedef uint64_t bitstring;
+//#define BS_DEBUG
 
 // bs_table size is 2^(BS_TABLE_SIZE)
 #define BS_TABLE_SIZE 16
@@ -32,6 +32,7 @@ void bs_free(bitstring* a);
 // bs_init_random initializes using rand() from stdlib.
 bitstring* bs_init_random(bitstring* a);
 bitstring* bs_init_zero(bitstring* a);
+bitstring* bs_init_adder(bitstring* a, adder_t *adder);
 
 // Alloc and copy any bitstring content.
 // Must NOT call bs_alloc before.
@@ -51,5 +52,11 @@ bitstring* bs_copy(bitstring* a);
 //     b[0] ^= 0x1248f;      // swap 8 bits
 //     d = bs_distance(a, b);    // d = 8
 unsigned int bs_distance(bitstring* a, bitstring* b);
+
+// TODO Comment.
+int bs_bitsign(bitstring* a, int bit);
+void bs_bitset(bitstring* a, int bit);
+void bs_bitclear(bitstring* a, int bit);
+void bs_print(bitstring* a);
 
 #endif

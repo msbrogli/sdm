@@ -4,6 +4,7 @@
 #include <assert.h>
 
 #include "hardlocation.h"
+#include "bitstring.h"
 
 extern const unsigned int bs_dimension;
 
