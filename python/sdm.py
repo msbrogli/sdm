@@ -103,3 +103,16 @@ class Bitstring(object):
     def __str__(self):
         return ''.join([ str(self.bit(k)) for k in reversed(range(get_dimension())) ])
 
+
+class Hardlocation(object):
+    def __init__(self, address=None, adder=None):
+        self._libsdm = _libsdm
+
+    def write(data):
+        self._libsdm.hl_write(self._hardlocation, data._bitstring)
+
+    def read(address):
+        bitstring = self._libsdm.hl_read(self._hardlocation)
+        return Bitstring(bitstring=bitstring)
+
+
