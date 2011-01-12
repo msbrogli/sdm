@@ -1,26 +1,29 @@
 CINCLUDE=.
 CFLAGS=-Wall -O3
-FLAGS=
 CC=gcc
 
 OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o
+TESTS=test_memory test_write
+
+LIB=python/libsdm.so
+
+.PHONY: all lib tests clean
+
+all: lib
+
+lib: $(LIB)
 
 %.o: %.c %.h sdm/common.h
-	$(CC) $(CFLAGS) -I$(CINCLUDE) -c -o $*.o $*.c
+	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c
 
-all: $(OBJS)
-	echo "All done."
-
-tests: $(OBJS) test_memory
-
-#test_bitstring: $(OBJS)
-#	$(CC) $(CFLAGS) -I$(CINCLUDE) $(TESTLIB) -o test_bistring $(OBJS) test_bitstring.cc
+$(LIB): $(OBJS)
+	gcc -shared -o $@ $(OBJS)
 
 test_%: test_%.c $(OBJS)
 	$(CC) $(CFLAGS) -I$(CINCLUDE) $(TESTLIB) -o test_$* $(OBJS) test_$*.c
 
-tests: test_*
+tests: $(TESTS)
 
 clean:
-	-rm -f sdm/*.o
+	rm -f $(OBJS) $(LIB) $(TESTS)
 

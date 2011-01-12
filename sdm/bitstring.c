@@ -122,21 +122,23 @@ unsigned int bs_distance(bitstring* a, bitstring* b) {
 	return dist;
 }
 
-int bs_bitsign(bitstring* a, int bit) {
+inline int bs_bit(bitstring* a, int bit) {
 	int i = bit/64, j = bit%64;
-	return (a[i]&(1<<j) ? 1 : -1);
+	return (a[bs_len-1-i]&((uint64_t)1<<j) ? 1 : 0);
+}
+
+int bs_bitsign(bitstring* a, int bit) {
+	return (bs_bit(a, bit) ? 1 : -1);
 }
 
 void bs_bitset(bitstring* a, int bit) {
 	int i = bit/64, j = bit%64;
-	//printf("+(%d,%d)", i, j);
-	a[i] |= ((uint64_t)1<<j);
+	a[bs_len-1-i] |= ((uint64_t)1<<j);
 }
 
 void bs_bitclear(bitstring* a, int bit) {
 	int i = bit/64, j = bit%64;
-	//printf("-(%d,%d)", i, j);
-	a[i] &= ~((uint64_t)1<<j);
+	a[bs_len-1-i] &= ~((uint64_t)1<<j);
 }
 
 void bs_print(bitstring* a) {
