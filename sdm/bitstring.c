@@ -85,10 +85,14 @@ bitstring* bs_init_zero(bitstring* a) {
 }
 
 bitstring* bs_init_random(bitstring* a) {
-	// FIXME clear lasts bits to fit bs_dimension
-	unsigned int i;
+	unsigned int i, d;
 	for(i=0; i<bs_len; i++) {
 		a[i] = ((uint64_t)rand())<<32 | rand();
+	}
+	// clear lasts bits to fit bs_dimension
+	d = 8*bs_len*sizeof(bitstring) - bs_dimension;
+	for(i=0; i<d; i++) {
+		a[0] &= ~((uint64_t)1<<(63-i));
 	}
 	return a;
 }
@@ -139,6 +143,13 @@ void bs_bitset(bitstring* a, int bit) {
 void bs_bitclear(bitstring* a, int bit) {
 	int i = bit/64, j = bit%64;
 	a[bs_len-1-i] &= ~((uint64_t)1<<j);
+}
+
+void bs_string(bitstring* a, char* str) {
+	int i;
+	for(i=0; i<bs_len; i++) {
+		sprintf(str+16*i, "%016llx", a[i]);
+	}
 }
 
 void bs_print(bitstring* a) {

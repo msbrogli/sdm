@@ -58,5 +58,6 @@ int bs_bitsign(bitstring* a, int bit);
 void bs_bitset(bitstring* a, int bit);
 void bs_bitclear(bitstring* a, int bit);
 void bs_print(bitstring* a);
+void bs_string(bitstring* a, char* str);
 
 #endif

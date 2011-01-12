@@ -12,6 +12,7 @@ _libsdm = ctypes.cdll.LoadLibrary('libsdm.so')
 _libsdm.bs_alloc.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_random.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_zero.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.bs_copy.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
@@ -54,13 +55,20 @@ class SDM(object):
 
 
 class Bitstring(object):
-    def __init__(self, zero=False):
+    @classmethod
+    def distance(cls, a, b):
+        return _libsdm.bs_distance(a._bitstring, b._bitstring)
+
+    def __init__(self, zero=False, bitstring=None):
         self._libsdm = _libsdm
-        self._bitstring = _libsdm.bs_alloc()
-        if zero:
-            _libsdm.bs_init_zero(self._bitstring)
+        if bitstring is not None:
+            self._bitstring = bitstring
         else:
-            _libsdm.bs_init_random(self._bitstring)
+            self._bitstring = _libsdm.bs_alloc()
+            if zero:
+                _libsdm.bs_init_zero(self._bitstring)
+            else:
+                _libsdm.bs_init_random(self._bitstring)
 
     def __del__(self):
         self._libsdm.bs_free(self._bitstring)
@@ -77,12 +85,21 @@ class Bitstring(object):
     def bitclear(self, bit):
         self._libsdm.bs_bitclear(self._bitstring, bit)
 
-    def distance(self, other):
+    def distance_to(self, other):
         return self._libsdm.bs_distance(self._bitstring, other._bitstring)
 
     def _print(self):
         self._libsdm.bs_print(self._bitstring)
 
+    def _string(self):
+        s = ctypes.create_string_buffer(get_dimension())
+        self._libsdm.bs_string(self._bitstring, s)
+        return s.value
+
+    def copy(self):
+        _clone = self._libsdm.bs_copy(self._bitstring)
+        return Bitstring(bitstring=_clone)
+
     def __str__(self):
-        return ''.join([ str(self.bit(k)) for k in range(get_dimension()) ])
+        return ''.join([ str(self.bit(k)) for k in reversed(range(get_dimension())) ])
 
