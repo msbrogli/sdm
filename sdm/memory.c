@@ -20,6 +20,9 @@ hardlocation** sdm_memory;
 int sdm_initialize() {
 	unsigned int i;
 
+	bs_initialize();
+	hl_initialize();
+
 	sdm_memory = (hardlocation**) malloc(sizeof(hardlocation*)*sdm_sample);
 	assert(sdm_memory != NULL);
 
@@ -28,6 +31,16 @@ int sdm_initialize() {
 	}
 
 	return 0;
+}
+
+void sdm_free() {
+	unsigned int i;
+
+	for(i=0; i<sdm_sample; i++) {
+		hl_free(sdm_memory[i]);
+	}
+
+	free(sdm_memory);
 }
 
 int sdm_write(bitstring* address, bitstring* data) {

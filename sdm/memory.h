@@ -8,6 +8,7 @@
 #include "hardlocation.h"
 
 int sdm_initialize();
+void sdm_free();
 int sdm_write(bitstring* address, bitstring* data);
 bitstring* sdm_read(bitstring* address);
 
