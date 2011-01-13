@@ -3,6 +3,11 @@
 import sdm
 from sdm import Bitstring, Hardlocation
 
+def write_random(qty):
+    for i in range(qty):
+        a = Bitstring()
+        print '#%d'%i, sdm.write(a, a)
+
 def sample():
     print 'Initializing SDM'
     sdm.initialize()
