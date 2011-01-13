@@ -8,50 +8,96 @@ class InitializedError(Exception):
 class NotInitializedError(Exception):
     pass
 
+class hardlocation_struct(ctypes.Structure):
+    _fields_ = [ ('address', ctypes.POINTER(ctypes.c_void_p)),
+                 ('adder', ctypes.POINTER(ctypes.c_void_p)) ]
+
 _libsdm = ctypes.cdll.LoadLibrary('libsdm.so')
+
 _libsdm.bs_alloc.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_random.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_zero.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_copy.restype = ctypes.POINTER(ctypes.c_void_p)
 
+_libsdm.hl_alloc.restype = ctypes.POINTER(hardlocation_struct)
+_libsdm.hl_init_random.restype = ctypes.POINTER(hardlocation_struct)
+_libsdm.hl_read.restype = ctypes.POINTER(ctypes.c_void_p)
+
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
 _sample = ctypes.c_int.in_dll(_libsdm, 'sdm_sample')
+_memory = ctypes.POINTER(ctypes.c_void_p).in_dll(_libsdm, 'sdm_sample')
 
 _libsdm.bs_initialize()
 _libsdm.hl_initialize()
+
+initialized = False
 
 def get_dimension():
     return _dimension.value
 
 def set_dimension(dimension):
+    global initialized
+    if initialized:
+        raise InitializedError
     _dimension.value = dimension
 
-class SDM(object):
-    def __init__(self):
-        self.initialized = False
+def get_sample():
+    return _sample.value
 
-    def initialize(self):
-        if self.initialized:
-            raise InitializedError
-        _libsdm.sdm_initialize()
-        self.initialized = True
+def set_sample(sample):
+    global initialized
+    if initialized:
+        raise InitializedError
+    _sample.value = sample
 
-    def free(self):
-        if not self.initialized:
-            raise NotInitializedError
-        _libsdm.sdm_free()
-        self.initialized = False
+def get_radius():
+    return _radius.value
 
-    def write(address, data, radius=None):
-        if not self.initialized:
-            raise NotInitializedError
-        pass
+def set_radius(radius, force=False):
+    global initialized
+    if not force and initialized:
+        raise InitializedError
+    _radius.value = radius
 
-    def read(address, radius=None):
-        if not self.initialized:
-            raise NotInitializedError
-        pass
+def initialize():
+    global initialized
+    if initialized:
+        raise InitializedError
+    _libsdm.sdm_initialize()
+    initialized = True
+
+def free():
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    _libsdm.sdm_free()
+    initialized = False
+
+def radius_count(address, radius):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return _libsdm.sdm_radius_count(address._bitstring, radius)
+
+def get_memory():
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    # TODO return a list of Hardlocation objects
+    raise NotImplementedError
+
+def write(address, data, radius=None):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return _libsdm.sdm_write(address._bitstring, data._bitstring)
+
+def read(address, radius=None):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    pass
 
 
 class Bitstring(object):
@@ -84,6 +130,9 @@ class Bitstring(object):
 
     def bitclear(self, bit):
         self._libsdm.bs_bitclear(self._bitstring, bit)
+    
+    def bitswap(self, bit):
+        self._libsdm.bs_bitswap(self._bitstring, bit)
 
     def distance_to(self, other):
         return self._libsdm.bs_distance(self._bitstring, other._bitstring)
@@ -107,11 +156,25 @@ class Bitstring(object):
 class Hardlocation(object):
     def __init__(self, address=None, adder=None):
         self._libsdm = _libsdm
+        self._hardlocation = self._libsdm.hl_alloc()
+        self._libsdm.hl_init_random(self._hardlocation)
 
-    def write(data):
+    def __del__(self):
+        self._libsdm.hl_free(self._hardlocation)
+
+    @property
+    def address(self):
+        return Bitstring(bitstring=self._hardlocation.contents.address)
+
+    @property
+    def adder(self):
+        _adder = ctypes.cast(self._hardlocation.contents.adder, ctypes.POINTER(ctypes.c_int8 * get_dimension()))
+        return [ x for x in _adder.contents ]
+
+    def write(self, data):
         self._libsdm.hl_write(self._hardlocation, data._bitstring)
 
-    def read(address):
+    def read(self):
         bitstring = self._libsdm.hl_read(self._hardlocation)
         return Bitstring(bitstring=bitstring)
 

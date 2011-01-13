@@ -145,6 +145,11 @@ void bs_bitclear(bitstring* a, int bit) {
 	a[bs_len-1-i] &= ~((uint64_t)1<<j);
 }
 
+void bs_bitswap(bitstring* a, int bit) {
+	int i = bit/64, j = bit%64;
+	a[bs_len-1-i] ^= ((uint64_t)1<<j);
+}
+
 void bs_string(bitstring* a, char* str) {
 	int i;
 	for(i=0; i<bs_len; i++) {
@@ -156,7 +161,7 @@ void bs_print(bitstring* a) {
 	int i;
 	printf("0x");
 	for(i=0; i<bs_len; i++) {
-		printf("%llx", a[i]);
+		printf("%016llx", a[i]);
 	}
 	printf("\n");
 }
