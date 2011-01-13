@@ -17,6 +17,7 @@ hardlocation* hl_alloc() {
 	assert(hl != NULL);
 	hl->address = bs_alloc();
 	hl->adder = (typeof(hl->adder)) malloc(sizeof(hl->adder[0])*bs_dimension);
+	assert(hl->adder != NULL);
 	return hl;
 }
 
@@ -28,13 +29,23 @@ hardlocation* hl_init_random(hardlocation* hl) {
 
 void hl_free(hardlocation* hl) {
 	bs_free(hl->address);
+	free(hl->adder);
 	free(hl);
 }
 
 void hl_write(hardlocation* hl, bitstring* data) {
+	int i, a;
+	for(i=0; i<bs_dimension; i++) {
+		a = bs_bitsign(data, i);
+		if (a > 0 && hl->adder[i] < 127) {
+			hl->adder[i]++;
+		} else if (a < 0 && hl->adder[i] > -127) {
+			hl->adder[i]--;
+		}
+	}
 }
 
 bitstring* hl_read(hardlocation* hl) {
-	return NULL;
+	return bs_init_adder(bs_alloc(), hl->adder);
 }
 

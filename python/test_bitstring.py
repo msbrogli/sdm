@@ -4,7 +4,7 @@ import unittest
 import sdm
 from sdm import Bitstring
 
-class BitstringTest(unittest.TestCase):
+class BitstringTestCase(unittest.TestCase):
 
     def setUp(self):
         pass

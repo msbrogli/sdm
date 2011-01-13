@@ -43,20 +43,31 @@ void sdm_free() {
 	free(sdm_memory);
 }
 
-int sdm_write(bitstring* address, bitstring* data) {
-	unsigned int i, j, counter = 0;
+unsigned int sdm_radius_count(bitstring* address, unsigned int radius) {
+	unsigned int i, counter = 0;
+	unsigned int dist;
+	for(i=0; i<sdm_sample; i++) {
+		dist = bs_distance(sdm_memory[i]->address, address);
+		if (dist <= radius) {
+			counter++;
+		}
+	}
+	//printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
+	return counter;
+}
+
+unsigned int sdm_write(bitstring* address, bitstring* data) {
+	unsigned int i, counter = 0;
 	unsigned int dist;
 	for(i=0; i<sdm_sample; i++) {
 		dist = bs_distance(sdm_memory[i]->address, address);
 		if (dist <= sdm_radius) {
-			for(j=0; j<bs_dimension; j++) {
-				sdm_memory[i]->adder[j] += bs_bitsign(data, j);
-			}
+			hl_write(sdm_memory[i], data);
 			counter++;
 		}
 	}
-	printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
-	return 0;
+	//printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
+	return counter;
 }
 
 bitstring* sdm_read(bitstring* address) {
