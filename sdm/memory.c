@@ -73,7 +73,8 @@ unsigned int sdm_write(bitstring* address, bitstring* data) {
 bitstring* sdm_read(bitstring* address) {
 	unsigned int i, j, counter = 0;
 	unsigned int dist;
-	adder_t adder[bs_dimension];
+	uint32_t adder[bs_dimension];
+	adder_t adder2[bs_dimension];
 	memset(adder, 0, sizeof(adder));
 	for(i=0; i<sdm_sample; i++) {
 		dist = bs_distance(sdm_memory[i]->address, address);
@@ -84,8 +85,15 @@ bitstring* sdm_read(bitstring* address) {
 			counter++;
 		}
 	}
-	printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
-	return bs_init_adder(bs_alloc(), adder);
+	// we can't add all adders in an adder_t type because
+	// it will probably overflow.
+	for(i=0; i<bs_dimension; i++) {
+		if (adder[i] > 0) adder2[i] = 1;
+		else if (adder[i] < 0) adder2[i] = -1;
+		else adder2[i] = 0;
+	}
+	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
+	return bs_init_adder(bs_alloc(), adder2);
 }
 
 void sdm_distance(bitstring* address, unsigned int *res) {

@@ -23,6 +23,8 @@ _libsdm.hl_alloc.restype = ctypes.POINTER(hardlocation_struct)
 _libsdm.hl_init_random.restype = ctypes.POINTER(hardlocation_struct)
 _libsdm.hl_read.restype = ctypes.POINTER(ctypes.c_void_p)
 
+_libsdm.sdm_read.restype = ctypes.POINTER(ctypes.c_void_p)
+
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
 _sample = ctypes.c_int.in_dll(_libsdm, 'sdm_sample')
@@ -105,7 +107,7 @@ def read(address, radius=None):
     global initialized
     if not initialized:
         raise NotInitializedError
-    pass
+    return Bitstring(bitstring=address._bitstring)
 
 
 class Bitstring(object):
