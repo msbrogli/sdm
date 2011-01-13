@@ -107,17 +107,23 @@ bitstring* bs_init_adder(bitstring* a, adder_t *adder) {
 }
 
 inline unsigned int bs_distance(bitstring* a, bitstring* b) {
-	register unsigned int i, j;
+	register unsigned int i;
+	//register unsigned int j;
 	unsigned int dist;
 	uint64_t c;
-	const unsigned int n = 8*sizeof(a[0])/BS_TABLE_SIZE;
+	//const unsigned int n = 8*sizeof(a[0])/BS_TABLE_SIZE;
 
 	dist = 0;
 	for(i=0; i<bs_len; i++) {
 		c = a[i] ^ b[i];
-		for(j=0; j<n; j++) {
-			dist += bs_table[(c>>(j*16))&0xffff];
-		}
+
+		// optimizing!
+		// take care when chaning BS_TABLE_SIZE or bitstring!
+		dist += bs_table[c&0xffff] + bs_table[(c>>16)&0xffff] + bs_table[(c>>32)&0xffff] + bs_table[(c>>48)&0xffff];
+
+		//for(j=0; j<n; j++) {
+		//	dist += bs_table[(c>>(j*BS_TABLE_SIZE))&0xffff];
+		//}
 	}
 	return dist;
 }
