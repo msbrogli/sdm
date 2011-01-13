@@ -13,7 +13,7 @@ extern unsigned int bs_dimension;
 // It is equivalent to |N'|, in Kanerva's book.
 unsigned int sdm_sample = 1000000;
 
-unsigned int sdm_radius = 436;
+unsigned int sdm_radius = 451;
 
 hardlocation** sdm_memory;
 
