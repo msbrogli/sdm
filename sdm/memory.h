@@ -13,5 +13,6 @@ void sdm_free();
 unsigned int sdm_radius_count(bitstring* address, unsigned int radius);
 unsigned int sdm_write(bitstring* address, bitstring* data);
 bitstring* sdm_read(bitstring* address);
+void sdm_distance(bitstring* address, unsigned int *res);
 
 #endif

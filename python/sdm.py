@@ -26,7 +26,7 @@ _libsdm.hl_read.restype = ctypes.POINTER(ctypes.c_void_p)
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
 _sample = ctypes.c_int.in_dll(_libsdm, 'sdm_sample')
-_memory = ctypes.POINTER(ctypes.c_void_p).in_dll(_libsdm, 'sdm_sample')
+_memory = ctypes.POINTER(ctypes.POINTER(hardlocation_struct)).in_dll(_libsdm, 'sdm_memory')
 
 _libsdm.bs_initialize()
 _libsdm.hl_initialize()
@@ -61,7 +61,7 @@ def set_radius(radius, force=False):
     _radius.value = radius
 
 def initialize():
-    global initialized
+    global initialized, _memory
     if initialized:
         raise InitializedError
     _libsdm.sdm_initialize()
@@ -74,18 +74,26 @@ def free():
     _libsdm.sdm_free()
     initialized = False
 
+def get_memory():
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return [ Hardlocation(hardlocation=_memory[i]) for i in range(get_sample()) ]
+
 def radius_count(address, radius):
     global initialized
     if not initialized:
         raise NotInitializedError
     return _libsdm.sdm_radius_count(address._bitstring, radius)
 
-def get_memory():
+def distance(address):
     global initialized
     if not initialized:
         raise NotInitializedError
-    # TODO return a list of Hardlocation objects
-    raise NotImplementedError
+    sample = get_sample()
+    buf = (ctypes.c_uint*sample)()
+    _libsdm.sdm_distance(address._bitstring, buf)
+    return [ x for x in buf ]
 
 def write(address, data, radius=None):
     global initialized
@@ -154,10 +162,13 @@ class Bitstring(object):
 
 
 class Hardlocation(object):
-    def __init__(self, address=None, adder=None):
+    def __init__(self, hardlocation=None):
         self._libsdm = _libsdm
-        self._hardlocation = self._libsdm.hl_alloc()
-        self._libsdm.hl_init_random(self._hardlocation)
+        if hardlocation is not None:
+            self._hardlocation = hardlocation
+        else:
+            self._hardlocation = self._libsdm.hl_alloc()
+            self._libsdm.hl_init_random(self._hardlocation)
 
     def __del__(self):
         self._libsdm.hl_free(self._hardlocation)
