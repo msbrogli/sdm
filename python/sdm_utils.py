@@ -3,6 +3,15 @@
 import sdm
 from sdm import Bitstring, Hardlocation
 
+def sample():
+    print 'Initializing SDM'
+    sdm.initialize()
+    dimension = sdm.get_dimension()
+    addr = Bitstring()
+    dist = sdm.distance(addr)
+    sdm.free()
+    return dist
+
 def sample_radius(rounds=1, verbose=0):
     if verbose > 0:
         print 'Initializing SDM'
@@ -48,5 +57,8 @@ def chart_sample_radius(rounds=1, verbose=0):
     grid(True)
     show()
 
-    return data
+    arr = array(zip(*data))
+    stat = [ (i, m, v) for i, (m, v) in enumerate(zip(arr.mean(axis=1), arr.std(axis=1))) ]
+
+    return data, stat
 

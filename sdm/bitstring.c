@@ -52,6 +52,7 @@ int bs_initialize() {
 
 	// init random for bs_init_random
 	srand(time(NULL));
+	assert(RAND_MAX == 0x7fffffff);
 
 	bs_debug("bitstring initialized successfully!\n");
 	return 0;
@@ -84,10 +85,18 @@ bitstring* bs_init_zero(bitstring* a) {
 	return a;
 }
 
+uint32_t myrand() {
+	uint32_t a = rand();
+	if (rand()%2 == 0) a |= 0x80000000;
+	return a;
+}
+
 bitstring* bs_init_random(bitstring* a) {
 	unsigned int i, d;
 	for(i=0; i<bs_len; i++) {
-		a[i] = ((uint64_t)rand())<<32 | rand();
+		//a[i] = ((uint64_t)(rand()&0xffff))<<48 | ((uint64_t)(rand()&0xffff))<<32 | (rand()&0xffff)<<16 | (rand()&0xffff);
+		//a[i] = ((uint64_t)rand())<<32 | rand();
+		a[i] = ((uint64_t)myrand())<<32 | myrand();
 	}
 	// clear lasts bits to fit bs_dimension
 	d = 8*bs_len*sizeof(bitstring) - bs_dimension;
@@ -99,9 +108,10 @@ bitstring* bs_init_random(bitstring* a) {
 
 bitstring* bs_init_adder(bitstring* a, adder_t *adder) {
 	unsigned int i;
+	bs_init_random(a);
 	for(i=0; i<bs_dimension; i++) {
-		if(adder[i] >= 0) bs_bitset(a, i);
-		else bs_bitclear(a, i);
+		if(adder[i] > 0) bs_bitset(a, i);
+		else if(adder[i] < 0) bs_bitclear(a, i);
 	}
 	return a;
 }
