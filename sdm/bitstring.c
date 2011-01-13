@@ -106,23 +106,40 @@ bitstring* bs_init_adder(bitstring* a, adder_t *adder) {
 	return a;
 }
 
-unsigned int bs_distance(bitstring* a, bitstring* b) {
-	unsigned int i, j, n, dist;
-	uint64_t c;
-	uint16_t* p;
+/*
+inline unsigned int bs_distance(bitstring* a, bitstring* b) {
+	register unsigned int i, j;
+	unsigned int dist;
+	uint64_t c, d;
+	const uint16_t* p = (uint16_t*)&c;
+	const unsigned int n = sizeof(a[0])/sizeof(p[0]);
 
-	p = (uint16_t*)&c;
-	n = sizeof(a[0])/sizeof(p[0]);
 	dist = 0;
-	bs_trace("bs_distance loop\n");
 	for(i=0; i<bs_len; i++) {
 		c = a[i] ^ b[i];
-		bs_trace("  %llx ^ %llx = %llx\n", a[i], b[i], c);
+		// http://tekpool.wordpress.com/category/bit-count/
+		d = c
+		    - ((c >> 1) & 033333333333)
+		    - ((c >> 2) & 011111111111);
+		dist += ((d + (d >> 3)) & 030707070707) % 63;
+	}
+	return dist;
+}
+*/
+
+inline unsigned int bs_distance(bitstring* a, bitstring* b) {
+	register unsigned int i, j;
+	unsigned int dist;
+	uint64_t c;
+	const unsigned int n = 8*sizeof(a[0])/BS_TABLE_SIZE;
+
+	dist = 0;
+	for(i=0; i<bs_len; i++) {
+		c = a[i] ^ b[i];
 		for(j=0; j<n; j++) {
-			dist += bs_table[p[j]];
+			dist += bs_table[(c>>(j*16))&0xffff];
 		}
 	}
-	bs_trace("bs_distance = %d\n", dist);
 	return dist;
 }
 
