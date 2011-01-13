@@ -88,3 +88,10 @@ bitstring* sdm_read(bitstring* address) {
 	return bs_init_adder(bs_alloc(), adder);
 }
 
+void sdm_distance(bitstring* address, unsigned int *res) {
+	unsigned int i;
+	for(i=0; i<sdm_sample; i++) {
+		res[i] = bs_distance(sdm_memory[i]->address, address);
+	}
+}
+
