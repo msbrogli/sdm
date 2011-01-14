@@ -7,11 +7,14 @@ TESTS=test_memory test_write
 
 LIB=python/libsdm.so
 
-.PHONY: all lib tests clean
+.PHONY: all lib tests clean rsync
 
 all: lib
 
 lib: $(LIB)
+
+rsync:
+	rsync --exclude-from '.rsyncignore' -av --delete . ~/Dropbox/Dr\ K/sdm/
 
 %.o: %.c %.h sdm/common.h
 	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c

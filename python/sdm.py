@@ -95,6 +95,12 @@ def radius_count(address, radius):
         raise NotInitializedError
     return _libsdm.sdm_radius_count(address._bitstring, radius)
 
+def radius_count_intersect(addr1, addr2, radius):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return _libsdm.sdm_radius_count_intersect(addr1._bitstring, addr2._bitstring, radius)
+
 def distance(address):
     global initialized
     if not initialized:
@@ -156,6 +162,9 @@ class Bitstring(object):
     
     def bitswap(self, bit):
         self._libsdm.bs_bitswap(self._bitstring, bit)
+
+    def bitrandomswap(self, qty):
+        self._libsdm.bs_bitrandomswap(self._bitstring, qty)
 
     def distance_to(self, other):
         return self._libsdm.bs_distance(self._bitstring, other._bitstring)
