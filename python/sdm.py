@@ -30,6 +30,7 @@ _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
 _sample = ctypes.c_int.in_dll(_libsdm, 'sdm_sample')
 _memory = ctypes.POINTER(ctypes.POINTER(hardlocation_struct)).in_dll(_libsdm, 'sdm_memory')
+_thread_count = ctypes.c_int.in_dll(_libsdm, 'sdm_thread_count')
 
 _libsdm.bs_initialize()
 _libsdm.hl_initialize()
@@ -63,6 +64,15 @@ def set_radius(radius, force=False):
         raise InitializedError
     _radius.value = radius
 
+def get_thread_count():
+    return _thread_count.value
+
+def set_thread_count(thread_count):
+    global initialized
+    if not force and initialized:
+        raise InitializedError
+    _thread_count.value = thread_count
+
 def initialize():
     global initialized, _memory
     if initialized:
@@ -89,16 +99,20 @@ def get_all_memory():
         raise NotInitializedError
     return [ Hardlocation(hardlocation=_memory[i], autofree=False) for i in range(get_sample()) ]
 
-def radius_count(address, radius):
+def radius_count(address, radius=None):
     global initialized
     if not initialized:
         raise NotInitializedError
+    if radius is None:
+        radius = get_radius()
     return _libsdm.sdm_radius_count(address._bitstring, radius)
 
 def radius_count_intersect(addr1, addr2, radius):
     global initialized
     if not initialized:
         raise NotInitializedError
+    if radius is None:
+        radius = get_radius()
     return _libsdm.sdm_radius_count_intersect(addr1._bitstring, addr2._bitstring, radius)
 
 def distance(address):
