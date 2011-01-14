@@ -1,2 +1,5 @@
-Nothing. :)
+
+- Save/load memory;
+- Funcao que, dados os bitstrings 'a' e 'b', gera um 'c' que esta 'k1' distante de 'a' e 'k2' distante de 'b'.
+  Quando k1=k2, temos o average. Temos que ter k1+k2 = dist(a, b)
 
