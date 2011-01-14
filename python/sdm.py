@@ -18,6 +18,7 @@ _libsdm.bs_alloc.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_random.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_zero.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_copy.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.bs_average.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _libsdm.hl_alloc.restype = ctypes.POINTER(hardlocation_struct)
 _libsdm.hl_init_random.restype = ctypes.POINTER(hardlocation_struct)
@@ -76,11 +77,17 @@ def free():
     _libsdm.sdm_free()
     initialized = False
 
-def get_memory():
+def get_memory(index):
     global initialized
     if not initialized:
         raise NotInitializedError
-    return [ Hardlocation(hardlocation=_memory[i]) for i in range(get_sample()) ]
+    return Hardlocation(hardlocation=_memory[index], autofree=False)
+
+def get_all_memory():
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return [ Hardlocation(hardlocation=_memory[i], autofree=False) for i in range(get_sample()) ]
 
 def radius_count(address, radius):
     global initialized
@@ -97,17 +104,17 @@ def distance(address):
     _libsdm.sdm_distance(address._bitstring, buf)
     return [ x for x in buf ]
 
-def write(address, data, radius=None):
+def write(address, data):
     global initialized
     if not initialized:
         raise NotInitializedError
     return _libsdm.sdm_write(address._bitstring, data._bitstring)
 
-def read(address, radius=None):
+def read(address):
     global initialized
     if not initialized:
         raise NotInitializedError
-    return Bitstring(bitstring=address._bitstring)
+    return Bitstring(bitstring=_libsdm.sdm_read(address._bitstring))
 
 
 class Bitstring(object):
@@ -115,8 +122,13 @@ class Bitstring(object):
     def distance(cls, a, b):
         return _libsdm.bs_distance(a._bitstring, b._bitstring)
 
-    def __init__(self, zero=False, bitstring=None):
+    @classmethod
+    def average(cls, a, b):
+        return Bitstring(bitstring=_libsdm.bs_average(a._bitstring, b._bitstring))
+
+    def __init__(self, zero=False, bitstring=None, autofree=True):
         self._libsdm = _libsdm
+        self.autofree = autofree
         if bitstring is not None:
             self._bitstring = bitstring
         else:
@@ -127,7 +139,8 @@ class Bitstring(object):
                 _libsdm.bs_init_random(self._bitstring)
 
     def __del__(self):
-        self._libsdm.bs_free(self._bitstring)
+        if self.autofree:
+            self._libsdm.bs_free(self._bitstring)
 
     def bit(self, bit):
         return self._libsdm.bs_bit(self._bitstring, bit)
@@ -164,8 +177,9 @@ class Bitstring(object):
 
 
 class Hardlocation(object):
-    def __init__(self, hardlocation=None):
+    def __init__(self, hardlocation=None, autofree=True):
         self._libsdm = _libsdm
+        self.autofree = autofree
         if hardlocation is not None:
             self._hardlocation = hardlocation
         else:
@@ -173,11 +187,12 @@ class Hardlocation(object):
             self._libsdm.hl_init_random(self._hardlocation)
 
     def __del__(self):
-        self._libsdm.hl_free(self._hardlocation)
+        if self.autofree:
+            self._libsdm.hl_free(self._hardlocation)
 
     @property
     def address(self):
-        return Bitstring(bitstring=self._hardlocation.contents.address)
+        return Bitstring(bitstring=self._hardlocation.contents.address, autofree=False)
 
     @property
     def adder(self):

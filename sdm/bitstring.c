@@ -169,6 +169,27 @@ void bs_string(bitstring* a, char* str) {
 	}
 }
 
+bitstring* bs_average(bitstring* a, bitstring* b) {
+	bitstring* avg = bs_alloc();
+	unsigned int i;
+	uint64_t c, p;
+	int first = 1;
+	for(i=0; i<bs_len; i++) {
+		avg[i] = a[i];
+		c = a[i]^b[i];
+		p = 1;
+		while(c) {
+			if (c&1) {
+				if (first) avg[i] ^= p;
+				first = 1 - first;
+			}
+			p <<= 1;
+			c >>= 1;
+		}
+	}
+	return avg;
+}
+
 void bs_print(bitstring* a) {
 	int i;
 	printf("0x");

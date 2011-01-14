@@ -9,6 +9,27 @@ class BitstringTestCase(unittest.TestCase):
     def setUp(self):
         pass
 
+    def test_average_same(self, qty=1000):
+        for i in range(qty):
+            a = Bitstring()
+            b = a.copy()
+            c = Bitstring.average(a, b)
+            self.assertEqual(c.distance_to(a), 0)
+            self.assertEqual(c.distance_to(b), 0)
+
+    def test_average_random(self, qty=1000):
+        for i in range(qty):
+            a = Bitstring()
+            b = Bitstring()
+            c = Bitstring.average(a, b)
+            d0 = a.distance_to(b)
+            d1 = c.distance_to(a)
+            d2 = c.distance_to(b)
+            self.assertEqual(d1+d2, d0)
+            self.assertTrue(d1 < d0)
+            self.assertTrue(d2 < d0)
+            self.assertTrue(abs(d1-d2) <= 1)
+
     def test_distance_zero(self, qty=1000):
         for i in range(qty):
             a = Bitstring()
@@ -46,6 +67,7 @@ class BitstringTestCase(unittest.TestCase):
             s1 = sum([ 1 for x in s[:dim-i-1] if x == '1' ])
             s2 = sum([ 1 for x in s[-i-1:] if x == '0' ])
             self.assertEqual(s1+s2, dim)
+
 
 
 if __name__ == '__main__':
