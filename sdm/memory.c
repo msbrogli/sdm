@@ -124,12 +124,6 @@ void sdm_distance(bitstring* address, unsigned int *res) {
 	}
 }
 
-typedef struct {
-	int id;
-	bitstring* address;
-	unsigned int counter;
-} sdm_find_near_params;
-
 void* sdm_find_near_thread(void* ptr) {
 	sdm_find_near_params* params = (sdm_find_near_params*) ptr;
 	bitstring* address;
