@@ -86,7 +86,7 @@ unsigned int sdm_write(bitstring* address, bitstring* data) {
 bitstring* sdm_read(bitstring* address) {
 	unsigned int i, j, k, counter = 0;
 	unsigned int dist;
-	uint32_t adder[bs_dimension];
+	int32_t adder[bs_dimension];
 	adder_t adder2[bs_dimension];
 	memset(adder, 0, sizeof(adder));
 	for(i=0; i<sdm_sample; i++) {
