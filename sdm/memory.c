@@ -56,6 +56,19 @@ unsigned int sdm_radius_count(bitstring* address, unsigned int radius) {
 	return counter;
 }
 
+unsigned int sdm_radius_count_intersect(bitstring* addr1, bitstring* addr2, unsigned int radius) {
+	unsigned int i, counter = 0;
+	unsigned int d1, d2;
+	for(i=0; i<sdm_sample; i++) {
+		d1 = bs_distance(sdm_memory[i]->address, addr1);
+		d2 = bs_distance(sdm_memory[i]->address, addr2);
+		if (d1 <= radius && d2 <= radius) {
+			counter++;
+		}
+	}
+	return counter;
+}
+
 unsigned int sdm_write(bitstring* address, bitstring* data) {
 	unsigned int i, counter = 0;
 	unsigned int dist;

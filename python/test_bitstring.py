@@ -2,12 +2,22 @@
 
 import unittest
 import sdm
+import random
 from sdm import Bitstring
 
 class BitstringTestCase(unittest.TestCase):
 
     def setUp(self):
         pass
+
+    def test_random_swap(self, qty=1000):
+        for i in range(qty):
+            a = Bitstring()
+            b = a.copy()
+            self.assertEqual(a.distance_to(b), 0)
+            dist = random.randint(0, sdm.get_dimension())
+            b.bitrandomswap(dist)
+            self.assertEqual(a.distance_to(b), dist)
 
     def test_average_same(self, qty=1000):
         for i in range(qty):

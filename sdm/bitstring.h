@@ -61,5 +61,6 @@ void bs_print(bitstring* a);
 void bs_string(bitstring* a, char* str);
 void bs_bitswap(bitstring* a, int bit);
 bitstring* bs_average(bitstring* a, bitstring* b);
+void bs_bitrandomswap(bitstring* a, int qty);
 
 #endif

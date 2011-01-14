@@ -169,6 +169,24 @@ void bs_string(bitstring* a, char* str) {
 	}
 }
 
+void bs_bitrandomswap(bitstring* a, int qty) {
+	unsigned int i, x, counter, arr[qty];
+	counter = 0;
+	while(counter < qty) {
+		x = rand() % bs_dimension;
+		for(i=0; i<counter; i++) {
+			if (arr[i] == x) break;
+		}
+		if (i == counter) {
+			arr[counter] = x;
+			counter++;
+		}
+	}
+	for(i=0; i<qty; i++) {
+		bs_bitswap(a, arr[i]);
+	}
+}
+
 bitstring* bs_average(bitstring* a, bitstring* b) {
 	bitstring* avg = bs_alloc();
 	unsigned int i;
