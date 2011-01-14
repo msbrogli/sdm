@@ -1,6 +1,5 @@
 .hg
 .hgignore
-.rsyncignore
 *.o
 *.so
 *.lo
