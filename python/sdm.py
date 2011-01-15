@@ -68,7 +68,7 @@ def set_radius(radius, force=False):
 def get_thread_count():
     return _thread_count.value
 
-def set_thread_count(thread_count):
+def set_thread_count(thread_count, force=False):
     global initialized
     if not force and initialized:
         raise InitializedError

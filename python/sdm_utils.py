@@ -1,12 +1,17 @@
 #!/usr/bin/env python
 
 import sdm
+from time import time
 from sdm import Bitstring, Hardlocation
 
-def write_random(qty):
+def write_random(qty, use_threads=True):
+    w = sdm.write if not use_threads else sdm.thread_write
+    t0 = time()
     for i in range(qty):
         a = Bitstring()
-        print '#%d'%i, sdm.write(a, a)
+        print '#%d'%i, w(a, a)
+    t1 = time()
+    print 'Time:', t1-t0, 'seconds'
 
 def sample():
     print 'Initializing SDM'
