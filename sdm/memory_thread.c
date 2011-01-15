@@ -18,46 +18,6 @@ extern hardlocation** sdm_memory;
 
 unsigned int sdm_thread_count = 4;
 
-/*
-void* sdm_thread_initialize_task(void* ptr) {
-	for(i=0; i<sdm_sample; i++) {
-		sdm_memory[i] = hl_init_random(hl_alloc());
-	}
-}
-
-int sdm_thread_initialize() {
-	pthread_t thread[sdm_thread_count];
-	sdm_thread_params params[sdm_thread_count];
-	unsigned int i;
-
-	bs_initialize();
-	hl_initialize();
-
-	sdm_memory = (hardlocation**) malloc(sizeof(hardlocation*)*sdm_sample);
-	assert(sdm_memory != NULL);
-
-	for(i=0; i<sdm_thread_count; i++) {
-		params[i].id = i;
-		pthread_create(&thread[i], NULL, sdm_thread_distance_task, (void*) &params[i]);
-	}
-	for(i=0; i<sdm_thread_count; i++) {
-		pthread_join(thread[i], NULL);
-	}
-
-	return 0;
-}
-
-void sdm_free() {
-	unsigned int i;
-
-	for(i=0; i<sdm_sample; i++) {
-		hl_free(sdm_memory[i]);
-	}
-
-	free(sdm_memory);
-}
-*/
-
 inline void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
 	int qty, extra;
 	qty = sdm_sample/sdm_thread_count;
@@ -113,8 +73,8 @@ bitstring* sdm_thread_read(bitstring* address) {
 	// it will probably overflow.
 	for(i=0; i<sdm_thread_count; i++) {
 		for(j=0; j<bs_dimension; j++) {
-			if (adder[j] > 0) adder2[j] = 1;
-			else if (adder[j] < 0) adder2[j] = -1;
+			if (adder[i][j] > 0) adder2[j] = 1;
+			else if (adder[i][j] < 0) adder2[j] = -1;
 			else adder2[j] = 0;
 		}
 	}
