@@ -25,6 +25,7 @@ _libsdm.hl_init_random.restype = ctypes.POINTER(hardlocation_struct)
 _libsdm.hl_read.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _libsdm.sdm_read.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.sdm_thread_read.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
@@ -107,7 +108,7 @@ def radius_count(address, radius=None):
         radius = get_radius()
     return _libsdm.sdm_radius_count(address._bitstring, radius)
 
-def radius_count_intersect(addr1, addr2, radius):
+def radius_count_intersect(addr1, addr2, radius=None):
     global initialized
     if not initialized:
         raise NotInitializedError
@@ -136,6 +137,42 @@ def read(address):
         raise NotInitializedError
     return Bitstring(bitstring=_libsdm.sdm_read(address._bitstring))
 
+def thread_radius_count(address, radius=None):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    if radius is None:
+        radius = get_radius()
+    return _libsdm.sdm_thread_radius_count(address._bitstring, radius)
+
+def thread_radius_count_intersect(addr1, addr2, radius=None):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    if radius is None:
+        radius = get_radius()
+    return _libsdm.sdm_thread_radius_count_intersect(addr1._bitstring, addr2._bitstring, radius)
+
+def thread_distance(address):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    sample = get_sample()
+    buf = (ctypes.c_uint*sample)()
+    _libsdm.sdm_thread_distance(address._bitstring, buf)
+    return [ x for x in buf ]
+
+def thread_write(address, data):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return _libsdm.sdm_thread_write(address._bitstring, data._bitstring)
+
+def thread_read(address):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return Bitstring(bitstring=_libsdm.sdm_thread_read(address._bitstring))
 
 class Bitstring(object):
     @classmethod

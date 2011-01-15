@@ -8,8 +8,6 @@
 #include "hardlocation.h"
 #include "bitstring.h"
 
-#define min(a, b) ((a)<(b) ? (a) : (b))
-
 extern unsigned int bs_dimension;
 
 // Number of samples from space.
@@ -17,8 +15,6 @@ extern unsigned int bs_dimension;
 unsigned int sdm_sample = 1000000;
 
 unsigned int sdm_radius = 451;
-
-unsigned int sdm_thread_count = 4;
 
 hardlocation** sdm_memory;
 
@@ -122,54 +118,5 @@ void sdm_distance(bitstring* address, unsigned int *res) {
 	for(i=0; i<sdm_sample; i++) {
 		res[i] = bs_distance(sdm_memory[i]->address, address);
 	}
-}
-
-void* sdm_find_near_thread(void* ptr) {
-	sdm_find_near_params* params = (sdm_find_near_params*) ptr;
-	bitstring* address;
-	unsigned int myid;
-	unsigned int qty, extra;
-	unsigned int offset, len;
-	unsigned int i, counter = 0;
-	unsigned int dist;
-
-	myid = params->id;
-	address = params->address;
-
-	qty = sdm_sample/sdm_thread_count;
-	extra = sdm_sample%sdm_thread_count;
-	len = qty + (myid < extra ? 1 : 0);
-	offset = myid*qty + min(myid, extra);
-	//printf("@@ (%d) %d [%d, %d]\n", myid, len, offset, offset+len-1);
-
-	for(i=0; i<len; i++) {
-		dist = bs_distance(sdm_memory[offset+i]->address, address);
-		if (dist <= sdm_radius) {
-			counter++;
-		}
-	}
-
-	params->counter = counter;
-	return NULL;
-}
-
-unsigned int sdm_find_near(bitstring* address) {
-	pthread_t thread[sdm_thread_count];
-	sdm_find_near_params params[sdm_thread_count];
-	int iret[sdm_thread_count];
-	unsigned int i, counter;
-	for(i=0; i<sdm_thread_count; i++) {
-		params[i].id = i;
-		params[i].address = address;
-		iret[i] = pthread_create(&thread[i], NULL, sdm_find_near_thread, (void*) &params[i]);
-	}
-	for(i=0; i<sdm_thread_count; i++) {
-		pthread_join(thread[i], NULL);
-	}
-	counter = 0;
-	for(i=0; i<sdm_thread_count; i++) {
-		counter += params[i].counter;
-	}
-	return counter;
 }
 

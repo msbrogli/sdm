@@ -7,12 +7,6 @@
 #include "bitstring.h"
 #include "hardlocation.h"
 
-typedef struct {
-	int id;
-	bitstring* address;
-	unsigned int counter;
-} sdm_find_near_params;
-
 // TODO comment
 int sdm_initialize();
 void sdm_free();
