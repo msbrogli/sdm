@@ -72,7 +72,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             cnt2 = sdm.thread_radius_count_intersect(a, b)
             self.assertEqual(cnt1, cnt2)
 
-    def test_writeread1(self, qty=10):
+    def test_writeread1(self, qty=20):
         sdm.initialize()
         for i in range(qty):
             a = Bitstring()
