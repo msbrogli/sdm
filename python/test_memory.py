@@ -26,6 +26,7 @@ class MemoryTestCase(unittest.TestCase):
             a = Bitstring()
             arr = array(sdm.distance(a))
             self.assertTrue(abs(arr.mean()-500) <= 1.5)
+        sdm.free()
 
     def test_writeread(self, qty=10):
         sdm.initialize()
@@ -34,6 +35,7 @@ class MemoryTestCase(unittest.TestCase):
             sdm.write(a, a)
             b = sdm.read(a)
             self.assertEqual(a.distance_to(b), 0)
+        sdm.free()
 
     def test_writereadnear(self, distance=50, qty=10):
         sdm.initialize()
@@ -44,6 +46,7 @@ class MemoryTestCase(unittest.TestCase):
             b.bitrandomswap(distance)
             c = sdm.read(b)
             self.assertEqual(a.distance_to(c), 0)
+        sdm.free()
 
 class MemoryThreadTestCase(unittest.TestCase):
 
@@ -54,6 +57,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             d1 = sdm.distance(a)
             d2 = sdm.thread_distance(a)
             self.assertEqual(d1, d2)
+        sdm.free()
 
     def test_radius_count(self, qty=10):
         sdm.initialize()
@@ -62,6 +66,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             cnt1 = sdm.radius_count(a)
             cnt2 = sdm.thread_radius_count(a)
             self.assertEqual(cnt1, cnt2)
+        sdm.free()
 
     def test_radius_count_intersect(self, qty=10):
         sdm.initialize()
@@ -71,6 +76,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             cnt1 = sdm.thread_radius_count_intersect(a, b)
             cnt2 = sdm.thread_radius_count_intersect(a, b)
             self.assertEqual(cnt1, cnt2)
+        sdm.free()
 
     def test_writeread1(self, qty=20):
         sdm.initialize()
@@ -79,6 +85,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             sdm.thread_write(a, a)
             b = sdm.read(a)
             self.assertEqual(a.distance_to(b), 0)
+        sdm.free()
 
     def test_writeread2(self, qty=10):
         sdm.initialize()
@@ -87,6 +94,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             sdm.write(a, a)
             b = sdm.thread_read(a)
             self.assertEqual(a.distance_to(b), 0)
+        sdm.free()
 
     def test_writeread3(self, qty=10):
         sdm.initialize()
@@ -95,6 +103,7 @@ class MemoryThreadTestCase(unittest.TestCase):
             sdm.thread_write(a, a)
             b = sdm.thread_read(a)
             self.assertEqual(a.distance_to(b), 0)
+        sdm.free()
 
 
 
