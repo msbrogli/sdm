@@ -45,6 +45,57 @@ class MemoryTestCase(unittest.TestCase):
             c = sdm.read(b)
             self.assertEqual(a.distance_to(c), 0)
 
+class MemoryThreadTestCase(unittest.TestCase):
+
+    def test_distance(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            d1 = sdm.distance(a)
+            d2 = sdm.thread_distance(a)
+            self.assertEqual(d1, d2)
+
+    def test_radius_count(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            cnt1 = sdm.radius_count(a)
+            cnt2 = sdm.thread_radius_count(a)
+            self.assertEqual(cnt1, cnt2)
+
+    def test_radius_count_intersect(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            b = Bitstring()
+            cnt1 = sdm.thread_radius_count_intersect(a, b)
+            cnt2 = sdm.thread_radius_count_intersect(a, b)
+            self.assertEqual(cnt1, cnt2)
+
+    def test_writeread1(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            sdm.thread_write(a, a)
+            b = sdm.read(a)
+            self.assertEqual(a.distance_to(b), 0)
+
+    def test_writeread2(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            sdm.write(a, a)
+            b = sdm.thread_read(a)
+            self.assertEqual(a.distance_to(b), 0)
+
+    def test_writeread3(self, qty=10):
+        sdm.initialize()
+        for i in range(qty):
+            a = Bitstring()
+            sdm.thread_write(a, a)
+            b = sdm.thread_read(a)
+            self.assertEqual(a.distance_to(b), 0)
+
 
 
 if __name__ == '__main__':

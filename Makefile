@@ -2,7 +2,7 @@ CINCLUDE=.
 CFLAGS=-Wall -O3
 CC=gcc
 
-OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o
+OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o sdm/memory_thread.o
 TESTS=test_memory test_write
 
 LIB=python/libsdm.so
