@@ -24,16 +24,26 @@ hardlocation** sdm_memory;
 int sdm_save_to_file(char* filename) {
 	FILE* fp;
 	unsigned int i;
-	size_t size;
+	size_t szbitstring, szadder_t;
+
 	fp = fopen(filename, "w");
 	if (fp == NULL ) return -1;
+
+	szbitstring = sizeof(bitstring);
+	szadder_t = sizeof(adder_t);
+
 	fputs(sdm_signature, fp);
 	fputs(sdm_version, fp);
-	size = sizeof(bitstring) + bs_dimension*sizeof(adder_t);
+	fwrite(&bs_dimension, sizeof(bs_dimension), 1, fp);
+	fwrite(&sdm_sample, sizeof(sdm_sample), 1, fp);
+	fwrite(&szbitstring, sizeof(&szbitstring), 1, fp);
+	fwrite(&szadder_t, sizeof(&szadder_t), 1, fp);
+
 	for(i=0; i<sdm_sample; i++) {
 		fwrite(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
 		fwrite(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
 	}
+
 	fclose(fp);
 	return 0;
 }
@@ -41,20 +51,39 @@ int sdm_save_to_file(char* filename) {
 int sdm_load_from_file(char* filename) {
 	FILE* fp;
 	unsigned int i;
+	unsigned int dimension, sample;
+	size_t bzbitstring, bzadder_t;
 	char signature[4], version[4];
+
 	fp = fopen(filename, "r");
 	if (fp == NULL) return -1;
+
 	fread(signature, sizeof(char), 3, fp);
 	signature[3] = '\0';
 	if (strcmp(signature, sdm_signature)) return -2;
+
 	fread(version, sizeof(char), 3, fp);
 	version[3] = '\0';
 	if (strcmp(version, sdm_version)) return -3;
+
+	fread(&dimension, sizeof(dimension), 1, fp);
+	if (dimension != bs_dimension) return -4;
+
+	fread(&sample, sizeof(sample), 1, fp);
+	if (sample != sdm_sample) return -5;
+
+	fread(&bzbitstring, sizeof(bzbitstring), 1, fp);
+	if (bzbitstring != sizeof(bitstring)) return -6;
+
+	fread(&bzadder_t, sizeof(bzadder_t), 1, fp);
+	if (bzadder_t != sizeof(adder_t)) return -7;
+
 	for(i=0; i<sdm_sample; i++) {
 		sdm_memory[i] = hl_alloc();
 		fread(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
 		fread(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
 	}
+
 	fclose(fp);
 	return 0;
 }
@@ -67,12 +96,13 @@ int sdm_initialize_from_file(char* filename) {
 
 	sdm_memory = (hardlocation**) malloc(sizeof(hardlocation*)*sdm_sample);
 	assert(sdm_memory != NULL);
+
 	ret = sdm_load_from_file(filename);
 	if (ret != 0) {
 		free(sdm_memory);
 	}
 
-	return 0;
+	return ret;
 }
 
 int sdm_initialize() {
