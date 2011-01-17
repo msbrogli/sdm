@@ -81,12 +81,27 @@ def initialize():
     _libsdm.sdm_initialize()
     initialized = True
 
+def initialize_from_file(filename):
+    global initialized
+    if initialized:
+        raise InitializedError
+    ret = _libsdm.sdm_initialize_from_file(filename)
+    if ret == 0:
+        initialized = True
+    return ret
+
 def free():
     global initialized
     if not initialized:
         raise NotInitializedError
     _libsdm.sdm_free()
     initialized = False
+
+def save_to_file(filename):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return _libsdm.sdm_save_to_file(filename)
 
 def get_memory(index):
     global initialized

@@ -16,7 +16,64 @@ unsigned int sdm_sample = 1000000;
 
 unsigned int sdm_radius = 451;
 
+const char sdm_signature[4] = "SDM";
+const char sdm_version[4] = "0.1";
+
 hardlocation** sdm_memory;
+
+int sdm_save_to_file(char* filename) {
+	FILE* fp;
+	unsigned int i;
+	size_t size;
+	fp = fopen(filename, "w");
+	if (fp == NULL ) return -1;
+	fputs(sdm_signature, fp);
+	fputs(sdm_version, fp);
+	size = sizeof(bitstring) + bs_dimension*sizeof(adder_t);
+	for(i=0; i<sdm_sample; i++) {
+		fwrite(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
+		fwrite(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
+	}
+	fclose(fp);
+	return 0;
+}
+
+int sdm_load_from_file(char* filename) {
+	FILE* fp;
+	unsigned int i;
+	char signature[4], version[4];
+	fp = fopen(filename, "r");
+	if (fp == NULL) return -1;
+	fread(signature, sizeof(char), 3, fp);
+	signature[3] = '\0';
+	if (strcmp(signature, sdm_signature)) return -2;
+	fread(version, sizeof(char), 3, fp);
+	version[3] = '\0';
+	if (strcmp(version, sdm_version)) return -3;
+	for(i=0; i<sdm_sample; i++) {
+		sdm_memory[i] = hl_alloc();
+		fread(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
+		fread(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
+	}
+	fclose(fp);
+	return 0;
+}
+
+int sdm_initialize_from_file(char* filename) {
+	int ret;
+
+	bs_initialize();
+	hl_initialize();
+
+	sdm_memory = (hardlocation**) malloc(sizeof(hardlocation*)*sdm_sample);
+	assert(sdm_memory != NULL);
+	ret = sdm_load_from_file(filename);
+	if (ret != 0) {
+		free(sdm_memory);
+	}
+
+	return 0;
+}
 
 int sdm_initialize() {
 	unsigned int i;
