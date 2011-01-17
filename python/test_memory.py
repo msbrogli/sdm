@@ -12,6 +12,20 @@ class MemoryTestCase(unittest.TestCase):
         p = subprocess.Popen("ps -p %d -o rss | grep '^ *[0-9]\+ *$'" % os.getpid(), shell=True, stdout=subprocess.PIPE)
         return int(p.communicate()[0])
 
+    def test_saveload(self):
+        a = Bitstring()
+        sdm.initialize()
+        sdm.write(a, a)
+        self.assertEqual(a.distance_to(sdm.read(a)), 0)
+        self.assertEqual(sdm.save_to_file('_test.sdm'), 0)
+        sdm.free()
+        sdm.initialize()
+        self.assertTrue(a.distance_to(sdm.read(a)) > 0)
+        sdm.free()
+        self.assertEqual(sdm.initialize_from_file('_test.sdm'), 0)
+        self.assertEqual(a.distance_to(sdm.read(a)), 0)
+        sdm.free()
+
     def test_initialize_free(self, qty=5):
         m0 = self._memused()
         for i in range(qty):
