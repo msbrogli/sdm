@@ -9,6 +9,7 @@
 #include "bitstring.h"
 
 extern unsigned int bs_dimension;
+extern unsigned int bs_len;
 
 // Number of samples from space.
 // It is equivalent to |N'|, in Kanerva's book.
@@ -40,7 +41,7 @@ int sdm_save_to_file(char* filename) {
 	fwrite(&szadder_t, sizeof(&szadder_t), 1, fp);
 
 	for(i=0; i<sdm_sample; i++) {
-		fwrite(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
+		fwrite(sdm_memory[i]->address, sizeof(bitstring), bs_len, fp);
 		fwrite(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
 	}
 
@@ -54,6 +55,7 @@ int sdm_load_from_file(char* filename) {
 	unsigned int dimension, sample;
 	size_t bzbitstring, bzadder_t;
 	char signature[4], version[4];
+	char c;
 
 	fp = fopen(filename, "r");
 	if (fp == NULL) return -1;
@@ -80,9 +82,12 @@ int sdm_load_from_file(char* filename) {
 
 	for(i=0; i<sdm_sample; i++) {
 		sdm_memory[i] = hl_alloc();
-		fread(&sdm_memory[i]->address, sizeof(bitstring), 1, fp);
+		fread(sdm_memory[i]->address, sizeof(bitstring), bs_len, fp);
 		fread(sdm_memory[i]->adder, sizeof(adder_t), bs_dimension, fp);
 	}
+
+	assert(fread(&c, sizeof(char), 1, fp) == 0);
+	assert(feof(fp));
 
 	fclose(fp);
 	return 0;
