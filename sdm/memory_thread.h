@@ -1,5 +1,5 @@
-#ifndef SDM_MEMORY_H_
-#define SDM_MEMORY_H_
+#ifndef SDM_MEMORY_THREAD_H_
+#define SDM_MEMORY_THREAD_H_
 
 #include <stdint.h>
 
