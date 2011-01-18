@@ -2,7 +2,7 @@ CINCLUDE=.
 CFLAGS=-Wall -O3
 CC=gcc
 
-OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o sdm/memory_thread.o
+OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o sdm/memory_thread.o sdm/memory_opencl.o
 TESTS=test_memory test_write
 
 LIB=python/libsdm.so
@@ -20,7 +20,7 @@ rsync:
 	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c
 
 $(LIB): $(OBJS)
-	gcc -shared -lpthread -o $@ $(OBJS)
+	gcc -shared -lpthread -o $@ $(OBJS) /System/Library/Frameworks/OpenCL.framework/OpenCL
 
 test_%: test_%.c $(OBJS)
 	$(CC) $(CFLAGS) -I$(CINCLUDE) $(TESTLIB) -o test_$* $(OBJS) test_$*.c
