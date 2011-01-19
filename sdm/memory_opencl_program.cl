@@ -1,4 +1,48 @@
 
+// Quick reference guide: http://www.khronos.org/files/opencl-quick-reference-card.pdf
+
+// According to quick reference, unsigned long has 64-bit unsigned.
+typedef unsigned long uint64_t;
+
+// According to quick reference, unsigned int has 32-bit unsigned.
+typedef unsigned int uint32_t;
+
+// According to quick reference, unsigned short has 16-bit unsigned.
+typedef unsigned short uint16_t;
+
+// According to quick reference, unsigned char has 8-bit unsigned.
+typedef unsigned char uint8_t;
+
+typedef uint64_t bitstring;
+typedef uint8_t adder_t;
+
+typedef struct {
+	__global bitstring* address;
+	__global adder_t* adder;
+} hardlocation;
+
+// Doesn't have enough contant memory for 16 bits
+#define BS_TABLE_SIZE 8
+
+__constant int bs_table[1<<BS_TABLE_SIZE];
+__constant unsigned int bs_dimension;
+__constant unsigned int bs_len;
+
+unsigned int bs_distance(
+	__global bitstring* a, 
+	__global bitstring* b) 
+{
+	unsigned int i, dist;
+	uint64_t c;
+	dist = 0;
+	for(i=0; i<bs_len; i++) {
+		c = a[i] ^ b[i];
+		dist += bs_table[c&0xff] + bs_table[(c>>8)&0xff] + bs_table[(c>>16)&0xff] + bs_table[(c>>24)&0xff] +
+		        bs_table[(c>>32)&0xff] + bs_table[(c>>40)&0xff] + bs_table[(c>>48)&0xff] + bs_table[(c>>56)&0xff];
+	}
+	return dist;
+}
+
 __kernel void
 write(
 	__global hardlocation** memory,
@@ -20,10 +64,12 @@ __kernel void
 count(
 	__global hardlocation** memory,
 	__global bitstring* address,
+	__global int* counter,
 	const unsigned int radius)
 {
 	int i = get_global_id(0);
-	if (bs_distance_to(memory[i], address), radius) {
+	if (bs_distance(memory[i]->address, address) <= radius) {
+		atom_add(counter, 1);
 	}
 }
 

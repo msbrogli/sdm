@@ -49,7 +49,7 @@ def sample_radius(rounds=1, verbose=0):
     return v
 
 def chart_sample_radius(rounds=1, verbose=0):
-    from pylab import *
+    import pylab
     data = sample_radius(rounds=rounds, verbose=verbose)
     #for i in range(sdm.get_dimension()+1):
     #    data[-1][i] += 100000
@@ -59,13 +59,13 @@ def chart_sample_radius(rounds=1, verbose=0):
     kwargs = { 'linewidth': 1.0 }
     for v in data:
         args.extend([ dist, v, 'k-' ])
-    plot(*args, **kwargs)
+    pylab.plot(*args, **kwargs)
 
-    xlabel('distance')
-    ylabel('qty of hardlocations')
-    title('Qty of hardlocations around random address')
-    grid(True)
-    show()
+    pylab.xlabel('distance')
+    pylab.ylabel('qty of hardlocations')
+    pylab.title('Qty of hardlocations around random address')
+    pylab.grid(True)
+    pylab.show()
 
     arr = array(zip(*data))
     stat = [ (i, m, v) for i, (m, v) in enumerate(zip(arr.mean(axis=1), arr.std(axis=1))) ]
