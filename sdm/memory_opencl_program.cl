@@ -25,8 +25,8 @@ typedef struct {
 #define BS_TABLE_SIZE 8
 
 __constant int bs_table[1<<BS_TABLE_SIZE];
-__constant unsigned int bs_dimension;
-__constant unsigned int bs_len;
+__constant unsigned int bs_dimension = 1000;
+__constant unsigned int bs_len = 16;
 
 unsigned int bs_distance(
 	__global bitstring* a, 
@@ -36,9 +36,14 @@ unsigned int bs_distance(
 	uint64_t c;
 	dist = 0;
 	for(i=0; i<bs_len; i++) {
-		c = a[i] ^ b[i];
-		dist += bs_table[c&0xff] + bs_table[(c>>8)&0xff] + bs_table[(c>>16)&0xff] + bs_table[(c>>24)&0xff] +
-		        bs_table[(c>>32)&0xff] + bs_table[(c>>40)&0xff] + bs_table[(c>>48)&0xff] + bs_table[(c>>56)&0xff];
+		//c = a[i] ^ b[i];
+		c = b[i];
+		while(c) {
+			if(c&1) dist++;
+			c >>= 1;
+		}
+		//dist += bs_table[c&0xff] + bs_table[(c>>8)&0xff] + bs_table[(c>>16)&0xff] + bs_table[(c>>24)&0xff] +
+		//        bs_table[(c>>32)&0xff] + bs_table[(c>>40)&0xff] + bs_table[(c>>48)&0xff] + bs_table[(c>>56)&0xff];
 	}
 	return dist;
 }
@@ -67,8 +72,8 @@ count(
 	__global int* counter,
 	const unsigned int radius)
 {
-	int i = get_global_id(0);
-	if (bs_distance(memory[i]->address, address) <= radius) {
+	int id = get_global_id(0);
+	if (bs_distance(memory[0]->address, address) <= radius) {
 		atom_add(counter, 1);
 	}
 }
