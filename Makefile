@@ -20,7 +20,7 @@ rsync:
 	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c
 
 $(LIB): $(OBJS)
-	gcc -shared -lpthread -o $@ $(OBJS) /System/Library/Frameworks/OpenCL.framework/OpenCL
+	gcc -shared -framework OpenCL -lpthread -o $@ $(OBJS)
 
 test_%: test_%.c $(OBJS)
 	$(CC) $(CFLAGS) -I$(CINCLUDE) $(TESTLIB) -o test_$* $(OBJS) test_$*.c
