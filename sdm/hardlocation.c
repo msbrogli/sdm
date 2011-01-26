@@ -37,10 +37,12 @@ void hl_write(hardlocation* hl, bitstring* data) {
 	int i, a;
 	for(i=0; i<bs_dimension; i++) {
 		a = bs_bitsign(data, i);
-		if (a > 0 && hl->adder[i] < 127) {
-			hl->adder[i]++;
-		} else if (a < 0 && hl->adder[i] > -127) {
-			hl->adder[i]--;
+		if (a > 0) {
+			if (hl->adder[i] < 127) hl->adder[i]++;
+			else printf("@@ WARNING WARNING!\n");
+		} else if (a < 0) {
+			if (hl->adder[i] > -127) hl->adder[i]--;
+			else printf("@@ WARNING WARNING!\n");
 		}
 	}
 }

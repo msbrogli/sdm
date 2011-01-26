@@ -1,8 +1,28 @@
 #!/usr/bin/env python
 
 import sdm
+import sys
 from time import time
 from sdm import Bitstring, Hardlocation
+
+def critical_distance(a, b, n, v, read=sdm.thread_read, debug=0):
+    ret = []
+    for i in xrange(a, b):
+        ret2 = []
+        for j in xrange(n):
+            u = v.copy()
+            u.bitrandomswap(i)
+            w = read(u)
+            d = v.distance_to(w)
+            if debug>1:
+                print '  ', i, j, d
+            ret2.append(d)
+        d = 1.0*sum(ret2)/len(ret2)
+        if debug>0:
+            print '#%d'%i, d
+            sys.stdout.flush()
+        ret.append([ i, d ])
+    return ret
 
 def write_random(qty, use_threads=True):
     w = sdm.write if not use_threads else sdm.thread_write
