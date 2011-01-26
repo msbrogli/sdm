@@ -22,7 +22,7 @@ unsigned int sdm_opencl_radius_count(bitstring* address, unsigned int radius) {
 	char *kernelSource;
 
 	size_t global;
-	size_t local;
+	//size_t local;
 
 	cl_device_id device_id;
 	cl_context context;
@@ -80,9 +80,11 @@ unsigned int sdm_opencl_radius_count(bitstring* address, unsigned int radius) {
 	assert(in_counter);
 
 	err = 0;
-	err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &in_memory);
+	//err = clSetKernelArg(kernel, 0, sizeof(cl_mem), &in_memory);
+	err = clSetKernelArg(kernel, 0, sizeof(sdm_memory), &sdm_memory);
 	assert(err == CL_SUCCESS);
-	err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &in_address);
+	//err = clSetKernelArg(kernel, 1, sizeof(cl_mem), &in_address);
+	err = clSetKernelArg(kernel, 1, sizeof(address), &address);
 	assert(err == CL_SUCCESS);
 	err = clSetKernelArg(kernel, 2, sizeof(cl_mem), &in_counter);
 	assert(err == CL_SUCCESS);
@@ -90,9 +92,8 @@ unsigned int sdm_opencl_radius_count(bitstring* address, unsigned int radius) {
 	assert(err == CL_SUCCESS);
 
 	global = 100000;
-	local = 2;
+	//local = 2;
 	counter = 0;
-	radius = 451;
 	err = clEnqueueNDRangeKernel(commands, kernel, 1, NULL, &global, NULL, 0, NULL, NULL);
 	assert(err == CL_SUCCESS);
 

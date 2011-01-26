@@ -176,6 +176,32 @@ unsigned int sdm_write(bitstring* address, bitstring* data) {
 }
 
 bitstring* sdm_read(bitstring* address) {
+	unsigned int i, j, counter = 0;
+	unsigned int dist;
+	int32_t adder[bs_dimension];
+	adder_t adder2[bs_dimension];
+	memset(adder, 0, sizeof(adder));
+	for(i=0; i<sdm_sample; i++) {
+		dist = bs_distance(sdm_memory[i]->address, address);
+		if (dist <= sdm_radius) {
+			for(j=0; j<bs_dimension; j++) {
+				adder[j] += sdm_memory[i]->adder[j];
+			}
+			counter++;
+		}
+	}
+	// we can't add all adders in an adder_t type because
+	// it will probably overflow.
+	for(i=0; i<bs_dimension; i++) {
+		if (adder[i] > 0) adder2[i] = 1;
+		else if (adder[i] < 0) adder2[i] = -1;
+		else adder2[i] = (rand()%2 == 0 ? 1 : -1);
+	}
+	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
+	return bs_init_adder(bs_alloc(), adder2);
+}
+
+bitstring* sdm_read_chada(bitstring* address) {
 	unsigned int i, j, k, counter = 0;
 	unsigned int dist;
 	int32_t adder[bs_dimension];
@@ -198,7 +224,7 @@ bitstring* sdm_read(bitstring* address) {
 	for(i=0; i<bs_dimension; i++) {
 		if (adder[i] > 0) adder2[i] = 1;
 		else if (adder[i] < 0) adder2[i] = -1;
-		else adder2[i] = 0;
+		else adder2[i] = (rand()%2 == 0 ? 1 : -1);
 	}
 	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
 	return bs_init_adder(bs_alloc(), adder2);
