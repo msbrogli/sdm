@@ -26,6 +26,8 @@ _libsdm.hl_read.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _libsdm.sdm_read.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.sdm_thread_read.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.sdm_read_chada.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.sdm_thread_read_chada.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _dimension = ctypes.c_int.in_dll(_libsdm, 'bs_dimension')
 _radius = ctypes.c_int.in_dll(_libsdm, 'sdm_radius')
@@ -152,6 +154,12 @@ def read(address):
         raise NotInitializedError
     return Bitstring(bitstring=_libsdm.sdm_read(address._bitstring))
 
+def read_chada(address):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return Bitstring(bitstring=_libsdm.sdm_read_chada(address._bitstring))
+
 def thread_radius_count(address, radius=None):
     global initialized
     if not initialized:
@@ -188,6 +196,12 @@ def thread_read(address):
     if not initialized:
         raise NotInitializedError
     return Bitstring(bitstring=_libsdm.sdm_thread_read(address._bitstring))
+
+def thread_read_chada(address):
+    global initialized
+    if not initialized:
+        raise NotInitializedError
+    return Bitstring(bitstring=_libsdm.sdm_thread_read_chada(address._bitstring))
 
 class Bitstring(object):
     @classmethod
