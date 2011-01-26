@@ -17,8 +17,8 @@ typedef uint64_t bitstring;
 typedef uint8_t adder_t;
 
 typedef struct {
-	__global bitstring* address;
-	__global adder_t* adder;
+	bitstring* address;
+	adder_t* adder;
 } hardlocation;
 
 // Doesn't have enough contant memory for 16 bits
@@ -67,13 +67,13 @@ read(
 
 __kernel void
 count(
-	__global hardlocation** memory,
-	__global bitstring* address,
-	__global int* counter,
+	hardlocation** memory,
+	bitstring* address,
+	int* counter,
 	const unsigned int radius)
 {
 	int id = get_global_id(0);
-	if (bs_distance(memory[0]->address, address) <= radius) {
+	if (bs_distance(memory[id]->address, address) <= radius) {
 		atom_add(counter, 1);
 	}
 }
