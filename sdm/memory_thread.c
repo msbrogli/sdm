@@ -55,7 +55,8 @@ bitstring* sdm_thread_read(bitstring* address) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	int32_t adder[sdm_thread_count][bs_dimension];
-	adder_t adder2[bs_dimension];
+	int32_t adder2[bs_dimension];
+	adder_t adder3[bs_dimension];
 	unsigned int i, j;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
@@ -66,17 +67,23 @@ bitstring* sdm_thread_read(bitstring* address) {
 	for(i=0; i<sdm_thread_count; i++) {
 		pthread_join(thread[i], NULL);
 	}
-	// we can't add all adders in an adder_t type because
-	// it will probably overflow.
+	// clear accumulator
+	for(j=0; j<bs_dimension; j++) adder2[j] = 0;
+	// accumulate
 	for(i=0; i<sdm_thread_count; i++) {
 		for(j=0; j<bs_dimension; j++) {
-			if (adder[i][j] > 0) adder2[j] = 1;
-			else if (adder[i][j] < 0) adder2[j] = -1;
-			else adder2[j] = (rand()%2 == 0 ? 1 : -1);
+			adder2[j] += adder[i][j];
 		}
 	}
+	// we can't add all adders in an adder_t type because
+	// it will probably overflow.
+	for(j=0; j<bs_dimension; j++) {
+		if (adder2[j] > 0) adder3[j] = 1;
+		else if (adder2[j] < 0) adder3[j] = -1;
+		else adder3[j] = (rand()%2 == 0 ? 1 : -1);
+	}
 	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
-	return bs_init_adder(bs_alloc(), adder2);
+	return bs_init_adder(bs_alloc(), adder3);
 }
 
 void* sdm_thread_read_chada_task(void* ptr) {
@@ -109,7 +116,8 @@ bitstring* sdm_thread_read_chada(bitstring* address) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	int32_t adder[sdm_thread_count][bs_dimension];
-	adder_t adder2[bs_dimension];
+	int32_t adder2[bs_dimension];
+	adder_t adder3[bs_dimension];
 	unsigned int i, j;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
@@ -120,17 +128,23 @@ bitstring* sdm_thread_read_chada(bitstring* address) {
 	for(i=0; i<sdm_thread_count; i++) {
 		pthread_join(thread[i], NULL);
 	}
-	// we can't add all adders in an adder_t type because
-	// it will probably overflow.
+	// clear accumulator
+	for(j=0; j<bs_dimension; j++) adder2[j] = 0;
+	// accumulate
 	for(i=0; i<sdm_thread_count; i++) {
 		for(j=0; j<bs_dimension; j++) {
-			if (adder[i][j] > 0) adder2[j] = 1;
-			else if (adder[i][j] < 0) adder2[j] = -1;
-			else adder2[j] = (rand()%2 == 0 ? 1 : -1);
+			adder2[j] += adder[i][j];
 		}
 	}
+	// we can't add all adders in an adder_t type because
+	// it will probably overflow.
+	for(j=0; j<bs_dimension; j++) {
+		if (adder2[j] > 0) adder3[j] = 1;
+		else if (adder2[j] < 0) adder3[j] = -1;
+		else adder3[j] = (rand()%2 == 0 ? 1 : -1);
+	}
 	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
-	return bs_init_adder(bs_alloc(), adder2);
+	return bs_init_adder(bs_alloc(), adder3);
 }
 
 void* sdm_thread_write_task(void* ptr) {
