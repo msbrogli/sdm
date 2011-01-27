@@ -1,9 +1,33 @@
 #!/usr/bin/env python
 
 import sdm
-import sys
+import sys, random
 from time import time
 from sdm import Bitstring, Hardlocation
+
+def test_uniform_distribution(qty=10000):
+    n = sdm.get_dimension()
+    v = [0]*n
+    for i in xrange(qty):
+        a = Bitstring()
+        for j in range(n):
+            v[j] += a.bitsign(j)
+    import pylab
+    pylab.hist(v, bins=15)
+    return v
+
+def table_7_1():
+    n = sdm.get_dimension()
+    a = Bitstring()
+    v = []
+    for i in range(550):
+        b = a.copy()
+        b.bitrandomswap(i)
+        v.append([ i, sdm.thread_radius_count_intersect(a, b) ])
+        print i
+        sys.stdout.flush()
+    return v
+
 
 def critical_distance(a, b, n, v, read=sdm.thread_read, debug=0):
     ret = []
