@@ -5,6 +5,8 @@
 
 #include "bitstring.h"
 
+//#define BS_DEBUG
+
 // Number of dimension in our memory space.
 unsigned int bs_dimension = 1000;
 
@@ -172,6 +174,7 @@ void bs_string(bitstring* a, char* str) {
 void bs_bitrandomswap(bitstring* a, int qty) {
 	unsigned int i, x, counter, arr[qty];
 	counter = 0;
+	assert(qty <= bs_dimension);
 	while(counter < qty) {
 		x = rand() % bs_dimension;
 		for(i=0; i<counter; i++) {
