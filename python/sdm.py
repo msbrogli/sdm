@@ -244,6 +244,8 @@ class Bitstring(object):
         self._libsdm.bs_bitswap(self._bitstring, bit)
 
     def bitrandomswap(self, qty):
+        if qty > get_dimension():
+            raise ValueError('number of bits to swap must be less or equal than number of dimensions')
         self._libsdm.bs_bitrandomswap(self._bitstring, qty)
 
     def distance_to(self, other):
