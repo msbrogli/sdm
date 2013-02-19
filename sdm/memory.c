@@ -4,7 +4,6 @@
 #include <string.h>
 
 #include "memory.h"
-#include "hardlocation.h"
 #include "bitstring.h"
 
 extern unsigned int bs_dimension;
@@ -19,8 +18,10 @@ unsigned int sdm_radius = 451;
 const char sdm_signature[4] = "SDM";
 const char sdm_version[4] = "0.1";
 
-hardlocation** sdm_memory;
+bitstring* sdm_memory_address;
+adder_t* sdm_memory_adder;
 
+/*
 int sdm_save_to_file(char* filename) {
 	FILE* fp;
 	unsigned int i;
@@ -108,132 +109,31 @@ int sdm_initialize_from_file(char* filename) {
 
 	return ret;
 }
+*/
 
 int sdm_initialize() {
 	unsigned int i;
+	unsigned int n;
 
 	bs_initialize();
-	hl_initialize();
 
-	sdm_memory = (hardlocation**) malloc(sizeof(hardlocation*)*sdm_sample);
-	assert(sdm_memory != NULL);
+	sdm_memory_address = (bitstring*) malloc(sizeof(bitstring)*bs_len*sdm_sample);
+	assert(sdm_memory_address != NULL);
+
+	n = bs_dimension * sdm_sample;
+	sdm_memory_adder = (adder_t*) malloc(sizeof(adder_t)*n);
+	assert(sdm_memory_adder != NULL);
+	memset(sdm_memory_adder, 0, sizeof(adder_t)*n);
 
 	for(i=0; i<sdm_sample; i++) {
-		sdm_memory[i] = hl_init_random(hl_alloc());
+		bs_init_random(get_sdm_memory_address(i));
 	}
 
 	return 0;
 }
 
 void sdm_free() {
-	unsigned int i;
-
-	for(i=0; i<sdm_sample; i++) {
-		hl_free(sdm_memory[i]);
-	}
-
-	free(sdm_memory);
-}
-
-unsigned int sdm_radius_count(bitstring* address, unsigned int radius) {
-	unsigned int i, counter = 0;
-	unsigned int dist;
-	for(i=0; i<sdm_sample; i++) {
-		dist = bs_distance(sdm_memory[i]->address, address);
-		if (dist <= radius) {
-			counter++;
-		}
-	}
-	//printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
-	return counter;
-}
-
-unsigned int sdm_radius_count_intersect(bitstring* addr1, bitstring* addr2, unsigned int radius) {
-	unsigned int i, counter = 0;
-	unsigned int d1, d2;
-	for(i=0; i<sdm_sample; i++) {
-		d1 = bs_distance(sdm_memory[i]->address, addr1);
-		d2 = bs_distance(sdm_memory[i]->address, addr2);
-		if (d1 <= radius && d2 <= radius) {
-			counter++;
-		}
-	}
-	return counter;
-}
-
-unsigned int sdm_write(bitstring* address, bitstring* data) {
-	unsigned int i, counter = 0;
-	unsigned int dist;
-	for(i=0; i<sdm_sample; i++) {
-		dist = bs_distance(sdm_memory[i]->address, address);
-		if (dist <= sdm_radius) {
-			hl_write(sdm_memory[i], data);
-			counter++;
-		}
-	}
-	//printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
-	return counter;
-}
-
-bitstring* sdm_read(bitstring* address) {
-	unsigned int i, j, counter = 0;
-	unsigned int dist;
-	int32_t adder[bs_dimension];
-	adder_t adder2[bs_dimension];
-	memset(adder, 0, sizeof(adder));
-	for(i=0; i<sdm_sample; i++) {
-		dist = bs_distance(sdm_memory[i]->address, address);
-		if (dist <= sdm_radius) {
-			for(j=0; j<bs_dimension; j++) {
-				adder[j] += sdm_memory[i]->adder[j];
-			}
-			counter++;
-		}
-	}
-	// we can't add all adders in an adder_t type because
-	// it will probably overflow.
-	for(i=0; i<bs_dimension; i++) {
-		if (adder[i] > 0) adder2[i] = 1;
-		else if (adder[i] < 0) adder2[i] = -1;
-		else adder2[i] = (rand()%2 == 0 ? 1 : -1);
-	}
-	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
-	return bs_init_adder(bs_alloc(), adder2);
-}
-
-bitstring* sdm_read_chada(bitstring* address) {
-	unsigned int i, j, k, counter = 0;
-	unsigned int dist;
-	int32_t adder[bs_dimension];
-	adder_t adder2[bs_dimension];
-	memset(adder, 0, sizeof(adder));
-	for(i=0; i<sdm_sample; i++) {
-		dist = bs_distance(sdm_memory[i]->address, address);
-		if (dist <= sdm_radius) {
-			for(j=0; j<bs_dimension; j++) {
-				if (sdm_memory[i]->adder[j] > 0) k = 1;
-				else if (sdm_memory[i]->adder[j] < 0) k = -1;
-				else k = (rand()%2 == 0 ? 1 : -1);
-				adder[j] += k;
-			}
-			counter++;
-		}
-	}
-	// we can't add all adders in an adder_t type because
-	// it will probably overflow.
-	for(i=0; i<bs_dimension; i++) {
-		if (adder[i] > 0) adder2[i] = 1;
-		else if (adder[i] < 0) adder2[i] = -1;
-		else adder2[i] = (rand()%2 == 0 ? 1 : -1);
-	}
-	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
-	return bs_init_adder(bs_alloc(), adder2);
-}
-
-void sdm_distance(bitstring* address, unsigned int *res) {
-	unsigned int i;
-	for(i=0; i<sdm_sample; i++) {
-		res[i] = bs_distance(sdm_memory[i]->address, address);
-	}
+	free(sdm_memory_address);
+	free(sdm_memory_adder);
 }
 
