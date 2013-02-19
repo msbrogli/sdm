@@ -1,0 +1,17 @@
+syntax: glob
+*.sdm
+*.o
+*.so
+*.lo
+*.la
+\#*#
+.*~
+*~
+.#*
+.DS_Store
+*.bak
+.*.swp
+.swp
+.swo
+*.pyc
+*.pyo
