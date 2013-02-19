@@ -1,5 +1,5 @@
 CINCLUDE=.
-CFLAGS=-Wall -O3
+CFLAGS=-Wall -O3 -mtune=native -fforce-addr -funroll-loops -frerun-cse-after-loop -frerun-loop-opt -falign-functions=4
 CC=gcc
 
 OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o sdm/memory_thread.o sdm/memory_opencl.o

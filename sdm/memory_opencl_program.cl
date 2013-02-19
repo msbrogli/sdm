@@ -21,7 +21,7 @@ typedef struct {
 	adder_t* adder;
 } hardlocation;
 
-// Doesn't have enough contant memory for 16 bits
+// Doesn't have enough constant memory for 16 bits
 #define BS_TABLE_SIZE 8
 
 __constant int bs_table[1<<BS_TABLE_SIZE];
@@ -47,6 +47,12 @@ unsigned int bs_distance(
 	}
 	return dist;
 }
+
+
+///probably good to make a method returning a pointer to the list of of a bitstring's hard locations 
+
+
+
 
 __kernel void
 write(

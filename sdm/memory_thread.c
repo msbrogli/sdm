@@ -16,7 +16,7 @@ extern unsigned int sdm_sample;
 extern unsigned int sdm_radius;
 extern hardlocation** sdm_memory;
 
-unsigned int sdm_thread_count = 4;
+unsigned int sdm_thread_count = 16;
 
 inline void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
 	int qty, extra;
@@ -38,7 +38,7 @@ void* sdm_thread_read_task(void* ptr) {
 
 	for(i=0; i<bs_dimension; i++) params->adder[i] = 0;
 	for(i=0; i<len; i++) {
-		dist = bs_distance(sdm_memory[offset+i]->address, params->address);
+		dist = bs_distance2(sdm_memory[offset+i]->address, params->address);
 		if (dist <= sdm_radius) {
 			for(j=0; j<bs_dimension; j++) {
 				params->adder[j] += sdm_memory[offset+i]->adder[j];
@@ -96,7 +96,7 @@ void* sdm_thread_read_chada_task(void* ptr) {
 
 	for(i=0; i<bs_dimension; i++) params->adder[i] = 0;
 	for(i=0; i<len; i++) {
-		dist = bs_distance(sdm_memory[offset+i]->address, params->address);
+		dist = bs_distance2(sdm_memory[offset+i]->address, params->address);
 		if (dist <= sdm_radius) {
 			for(j=0; j<bs_dimension; j++) {
 				if (sdm_memory[offset+i]->adder[j] > 0) k = 1;
@@ -156,7 +156,7 @@ void* sdm_thread_write_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		dist = bs_distance(sdm_memory[offset+i]->address, params->address);
+		dist = bs_distance2(sdm_memory[offset+i]->address, params->address);
 		if (dist <= sdm_radius) {
 			hl_write(sdm_memory[offset+i], params->data);
 			counter++;
@@ -196,8 +196,8 @@ void* sdm_thread_radius_count_intersect_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		d1 = bs_distance(sdm_memory[offset+i]->address, params->addr1);
-		d2 = bs_distance(sdm_memory[offset+i]->address, params->addr2);
+		d1 = bs_distance2(sdm_memory[offset+i]->address, params->addr1);
+		d2 = bs_distance2(sdm_memory[offset+i]->address, params->addr2);
 		if (d1 <= params->radius && d2 <= params->radius) {
 			counter++;
 		}
@@ -237,7 +237,7 @@ void* sdm_thread_radius_count_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		dist = bs_distance(sdm_memory[offset+i]->address, params->address);
+		dist = bs_distance2(sdm_memory[offset+i]->address, params->address);
 		if (dist <= params->radius) {
 			counter++;
 		}
@@ -275,7 +275,7 @@ void* sdm_thread_distance_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		params->res[offset+i] = bs_distance(sdm_memory[offset+i]->address, params->address);
+		params->res[offset+i] = bs_distance2(sdm_memory[offset+i]->address, params->address);
 	}
 
 	return NULL;
@@ -294,5 +294,67 @@ void sdm_thread_distance(bitstring* address, unsigned int *res) {
 	for(i=0; i<sdm_thread_count; i++) {
 		pthread_join(thread[i], NULL);
 	}
+}
+
+////LINHARES SCREWING AROUND HERE
+
+void* sdm_thread_read_cubed_task(void* ptr) {
+	sdm_thread_params* params = (sdm_thread_params*) ptr;
+	unsigned int myid, offset, len;
+	unsigned int i, j, counter = 0;
+	adder_t v;
+	unsigned int dist;
+	
+	sdm_thread_offset(params, &myid, &offset, &len);
+	
+	for(i=0; i<bs_dimension; i++) params->adder[i] = 0;
+	for(i=0; i<len; i++) {
+		dist = bs_distance2(sdm_memory[offset+i]->address, params->address);
+		if (dist <= sdm_radius) {
+			for(j=0; j<bs_dimension; j++) {
+				v = sdm_memory[offset+i]->adder[j];
+				params->adder[j] += v*v*v;
+			}
+			counter++;
+		}
+	}
+	
+	params->counter = counter;
+	return NULL;
+}
+
+bitstring* sdm_thread_read_cubed(bitstring* address) {
+	pthread_t thread[sdm_thread_count];
+	sdm_thread_params params[sdm_thread_count];
+	int32_t adder[sdm_thread_count][bs_dimension];
+	int32_t adder2[bs_dimension];
+	adder_t adder3[bs_dimension];
+	unsigned int i, j;
+	for(i=0; i<sdm_thread_count; i++) {
+		params[i].id = i;
+		params[i].address = address;
+		params[i].adder = adder[i];
+		pthread_create(&thread[i], NULL, sdm_thread_read_task, (void*) &params[i]);
+	}
+	for(i=0; i<sdm_thread_count; i++) {
+		pthread_join(thread[i], NULL);
+	}
+	// clear accumulator
+	for(j=0; j<bs_dimension; j++) adder2[j] = 0;
+	// accumulate
+	for(i=0; i<sdm_thread_count; i++) {
+		for(j=0; j<bs_dimension; j++) {
+			adder2[j] += adder[i][j];
+		}
+	}
+	// we can't add all adders in an adder_t type because
+	// it will probably overflow.
+	for(j=0; j<bs_dimension; j++) {
+		if (adder2[j] > 0) adder3[j] = 1;
+		else if (adder2[j] < 0) adder3[j] = -1;
+		else adder3[j] = (rand()%2 == 0 ? 1 : -1);
+	}
+	//printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
+	return bs_init_adder(bs_alloc(), adder3);
 }
 

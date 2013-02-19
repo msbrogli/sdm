@@ -63,4 +63,8 @@ void bs_bitswap(bitstring* a, int bit);
 bitstring* bs_average(bitstring* a, bitstring* b);
 void bs_bitrandomswap(bitstring* a, int qty);
 
+//LINHARES
+bitstring* bs_init_adder_linhares(bitstring* hl_address, adder_t* adder, float avg);
+bitstring* bs_bit_copy_NOT(bitstring* a, bitstring *b, int bit);
+
 #endif

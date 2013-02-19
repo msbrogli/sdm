@@ -1,104 +1,9 @@
 #!/usr/bin/env python
 
 import sdm
-import pylab
 import sys, random
-from matplotlib import pyplot
 from time import time
-from math import sqrt
 from sdm import Bitstring, Hardlocation
-
-class Projection2D(object):
-    def __init__(self, a, b, c, name_a=None, name_b=None, name_c=None, figure_opts=None):
-        self.bitstrings = [ a, b, c ]
-        self.elements = self._create_base(a, b, c)
-        self.names = [ name_a or 'a', name_b or 'b', name_c or 'c' ]
-        self.figure = pyplot.figure(**(figure_opts or {}))
-        pyplot.plot([ e.real for e in self.elements ], [ e.imag for e in self.elements ], 'ko')
-        pyplot.plot([ e.real for e in self.elements ] + [ self.elements[0].real ], [ e.imag for e in self.elements ] + [ self.elements[0].imag ], 'k--')
-        textcoords = [ (-30, -30), (30, -30), (-30, 30) ]
-        for name, e, tc in zip(self.names, self.elements, textcoords):
-            pyplot.annotate(
-                name,
-                xy=(e.real, e.imag), xycoords='data', 
-                xytext=tc, textcoords='offset points', 
-                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2')
-            )
-        axis = pyplot.gca()
-        axis.set_xlim(-70, self.elements[1].real+70)
-        axis.set_ylim(-70, self.elements[2].imag+70)
-
-    def _create_base(self, a, b, c):
-        """Maps bitstring to a nice representation in R^2.
-        Rules:
-         - a is always origin;
-         - b is always on x axis, that is, b.y=0;
-         - c is always on first quadrant (x>=0, y>=0)"""
-        d0 = a.distance_to(b)
-        d1 = a.distance_to(c)
-        d2 = b.distance_to(c)
-        cx = 1.0*(d0*d0 + d1*d1 - d2*d2)/2/d0
-        cy2 = d1*d1 - cx*cx
-        if cy2 < 0:
-            raise ValueError()
-        cy = sqrt(cy2)
-        return [ 0, d0, cx+cy*1j ]
-
-    def add_bitstring(self, x, label=None, fmt='k,', radius=None):
-        """According to a base, maps a bitstring to a point inside
-        base triangle."""
-        p = 0
-        distances = [ e.distance_to(x) for e in self.bitstrings ]
-        if radius:
-            ignore = True
-            for d in distances:
-                if d <= radius:
-                    ignore = False
-            if ignore:
-                return None
-        #print distances
-        total = sum(distances)
-        factor = 100.0
-        weights = [ (factor/(1.0+factor*d/total) - factor/(1+factor))**2 for d in distances ]
-        totalweights = sum(weights)
-        for te, w in zip(self.elements, weights):
-            p += (w/totalweights)*te
-        pyplot.figure(self.figure.number)
-        pyplot.plot(p.real, p.imag, fmt)
-        if label:
-            pyplot.annotate(
-                label,
-                xy=(p.real, p.imag), xycoords='data', 
-                xytext=(-30, 30), textcoords='offset points', 
-                arrowprops=dict(arrowstyle='->', connectionstyle='arc3,rad=.2')
-            )
-        return p
-
-    def add_all_hardlocations(self, radius=None):
-        n = sdm.get_sample()
-        for i in xrange(n):
-            hl = sdm.get_memory(i)
-            self.add_bitstring(hl.address, radius=radius)
-            print '#', i
-
-    def test_distance(self, x, a, b, step=1):
-        for i in xrange(a, b+1, step):
-            y = x.copy()
-            y.bitrandomswap(i)
-            self.add_bitstring(y, label='%d'%i)
-
-    def add_iterative_read(self, address, steps=6):
-        d = address
-        last = self.add_bitstring(d)
-        for i in xrange(steps):
-            d = sdm.thread_read(d)
-            print '#%d'%i, d.distance_to(address)
-            pos = self.add_bitstring(d)
-            dif = last-pos
-            pyplot.arrow(last.real, last.imag, dif.real, dif.imag, label='%d'%i)
-            last = pos
-        return d
-
 
 def test_uniform_distribution(qty=10000):
     n = sdm.get_dimension()
@@ -132,6 +37,28 @@ def critical_distance(a, b, n, v, read=sdm.thread_read, debug=0):
             u = v.copy()
             u.bitrandomswap(i)
             w = read(u)
+            d = v.distance_to(w)
+            if debug>1:
+                print '  ', i, j, d
+            ret2.append(d)
+        d = 1.0*sum(ret2)/len(ret2)
+        if debug>0:
+            print '#%d'%i, d
+            sys.stdout.flush()
+        ret.append([ i, d ])
+    return ret
+
+
+def critical_distance2(a, b, n, v, iterated_reading=6, read=sdm.thread_read, debug=0):
+    ret = []
+    for i in xrange(a, b):
+        ret2 = []
+        for j in xrange(n):
+            u = v.copy()
+            u.bitrandomswap(i)
+            w = read(u)
+            for k in range (iterated_reading-1):
+            	w = read (w)
             d = v.distance_to(w)
             if debug>1:
                 print '  ', i, j, d

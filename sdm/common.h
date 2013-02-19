@@ -3,11 +3,13 @@
 
 typedef uint64_t bitstring;
 
-typedef int8_t adder_t;
+typedef int16_t adder_t;
 
 typedef struct {
 	bitstring* address;
 	adder_t* adder;
+	int num_items;
+	float p;
 } hardlocation;
 
 

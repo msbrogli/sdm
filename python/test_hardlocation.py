@@ -64,7 +64,5 @@ class HardlocationTestCase(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    sdm.set_dimension(256)
-    sdm._libsdm.bs_initialize()
     unittest.main()
 
