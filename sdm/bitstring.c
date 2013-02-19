@@ -66,6 +66,16 @@ bitstring* bs_alloc() {
 	return a;
 }
 
+bitstring* bs_alloc_vector(unsigned int n) {
+	bitstring* a = (bitstring*) malloc(sizeof(a[0])*bs_len*n);
+	assert(a != NULL);
+	return a;
+}
+
+bitstring* bs_vector_element(bitstring* vector, unsigned int index) {
+	return &vector[bs_len*index];
+}
+
 void bs_free(bitstring* a) {
 	free(a);
 }

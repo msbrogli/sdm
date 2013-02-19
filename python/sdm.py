@@ -15,10 +15,12 @@ class hardlocation_struct(ctypes.Structure):
 _libsdm = ctypes.cdll.LoadLibrary('libsdm.so')
 
 _libsdm.bs_alloc.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.bs_alloc_vector.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_random.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_zero.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_copy.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_average.restype = ctypes.POINTER(ctypes.c_void_p)
+_libsdm.bs_vector_element.restype = ctypes.POINTER(ctypes.c_void_p)
 
 _libsdm.hl_alloc.restype = ctypes.POINTER(hardlocation_struct)
 _libsdm.hl_init_random.restype = ctypes.POINTER(hardlocation_struct)

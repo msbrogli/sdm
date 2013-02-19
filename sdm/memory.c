@@ -21,6 +21,9 @@ const char sdm_version[4] = "0.1";
 
 hardlocation** sdm_memory;
 
+//bitstring *hl_address;
+//adder_t *hl_adders;
+
 int sdm_save_to_file(char* filename) {
 	FILE* fp;
 	unsigned int i;

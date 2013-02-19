@@ -20,8 +20,15 @@ int bs_initialize();
 //     bitstring* a = bs_alloc();
 bitstring* bs_alloc();
 
+// Alloc a bitstring vector without initializing it.
+// Must be called before any bs_init_* function.
+bitstring* bs_alloc_vector(unsigned int n);
+
 // Free bitstring memory.
 void bs_free(bitstring* a);
+
+// Return a pointer to any element in a bitstring vector.
+bitstring* bs_vector_element(bitstring* vector, unsigned int index);
 
 // Initialize a bitstring already allocated.
 // Must call bs_alloc before use any bs_init_* function.
