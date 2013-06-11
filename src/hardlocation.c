@@ -39,10 +39,10 @@ void hl_write(hardlocation* hl, bitstring* data) {
 		a = bs_bitsign(data, i);
 		if (a > 0) {
 			if (hl->adder[i] < 127) hl->adder[i]++;
-			else printf("@@ WARNING WARNING!\n");
+			else printf("@@ WARNING adder[%d] overflow!\n", i);
 		} else if (a < 0) {
 			if (hl->adder[i] > -127) hl->adder[i]--;
-			else printf("@@ WARNING WARNING!\n");
+			else printf("@@ WARNING adder[%d] overflow!\n", i);
 		}
 	}
 }

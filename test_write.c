@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include "sdm/memory.h"
+#include "src/memory.h"
 
 extern unsigned int bs_dimension;
 extern unsigned int sdm_sample;

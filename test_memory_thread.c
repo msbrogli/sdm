@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "src/memory.h"
+#include "src/memory_thread.h"
 
 extern unsigned int bs_dimension;
 extern unsigned int sdm_sample;
@@ -9,7 +10,7 @@ extern unsigned int sdm_radius;
 int main(int argv, char **argc) {
 	bitstring* address;
 	bitstring* data;
-	int i, lo, hi;
+	int i, lo, hi, k;
 
 	if (argv == 4) {
 		bs_dimension = atoi(argc[1]);
@@ -31,9 +32,10 @@ int main(int argv, char **argc) {
 	lo = 0;
 	hi = bs_dimension;
 	for(i=lo; i<=hi; i++) {
-		sdm_radius = i;
-		sdm_write(address, data);
-		printf("%d done.\n", i);
+		//sdm_radius = i;
+		data = bs_init_random(data);
+		k = sdm_thread_write(address, data);
+		printf("%d done [%d address written].\n", i, k);
 		fflush(stdout);
 	}
 

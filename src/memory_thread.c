@@ -16,7 +16,7 @@ extern unsigned int sdm_sample;
 extern unsigned int sdm_radius;
 extern hardlocation** sdm_memory;
 
-unsigned int sdm_thread_count = 4;
+unsigned int sdm_thread_count = 8;
 
 inline void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
 	int qty, extra;
