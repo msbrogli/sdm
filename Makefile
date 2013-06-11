@@ -2,7 +2,7 @@ CINCLUDE=.
 CFLAGS=-Wall -O3
 CC=gcc
 
-OBJS=sdm/bitstring.o sdm/hardlocation.o sdm/memory.o sdm/memory_thread.o sdm/memory_opencl.o
+OBJS=src/bitstring.o src/hardlocation.o src/memory.o src/memory_thread.o src/memory_opencl.o
 TESTS=test_memory test_write
 
 LIB=python/libsdm.so
@@ -16,7 +16,7 @@ lib: $(LIB)
 rsync:
 	rsync --exclude-from '.rsyncignore' -av --delete . ~/Dropbox/Dr\ K/sdm/
 
-%.o: %.c %.h sdm/common.h
+%.o: %.c %.h src/common.h
 	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c
 
 $(LIB): $(OBJS)
