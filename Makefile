@@ -2,7 +2,7 @@ CINCLUDE=.
 CFLAGS=-Wall -O3
 CC=gcc
 
-OBJS=sdm/bitstring.o sdm/memory.o sdm/memory_thread.o
+OBJS=src/core/bitstring.o src/core/memory.o src/core/memory_thread.o
 
 LIB=python/libsdm.so
 
@@ -12,11 +12,11 @@ all: lib
 
 lib: $(LIB)
 
-%.o: %.c %.h sdm/common.h
+%.o: %.c %.h src/core/common.h
 	$(CC) $(CFLAGS) -fPIC -I$(CINCLUDE) -c -o $*.o $*.c
 
 $(LIB): $(OBJS)
-	gcc -shared -framework OpenCL -lpthread -o $@ $(OBJS)
+	gcc -shared -lpthread -o $@ $(OBJS)
 
 clean:
 	rm -f $(OBJS) $(LIB) $(TESTS)
