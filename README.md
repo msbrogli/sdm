@@ -31,3 +31,4 @@ Authors
 
 * 2011 Marcelo Salhab Brogliato
 * 2011 Alexandre Linhares
+* 2011 Daniel Chada
