@@ -15,10 +15,6 @@ extern unsigned int sdm_sample;
 int tcp_listen();
 
 int main(void) {
-	int fd;
-	char *myfifo = "/tmp/sdmfifo";
-	char buf[100];
-
 	printf("Sparse Distributed Memory\n");
 	printf("-------------------------\n");
 	printf("Dimensions: %u bits\n", bs_dimension);
