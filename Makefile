@@ -8,7 +8,10 @@ LIB=python/libsdm.so
 
 .PHONY: all lib tests clean rsync
 
-all: lib
+all: lib main
+
+main: $(OBJS) src/main.c
+	gcc -lpthread -o main src/main.c $(OBJS)
 
 lib: $(LIB)
 
