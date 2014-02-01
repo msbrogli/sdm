@@ -10,6 +10,17 @@ What is it for?
 
 To do.
 
+How to install?
+---------------
+
+You need GNU autotools installed in your computer. Then run the following commands:
+
+    ./autogen.sh
+	./configure
+	make
+
+The Python wrapper is in `python/` directory.
+
 How do I contribute?
 --------------------
 
