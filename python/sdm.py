@@ -8,7 +8,8 @@ class InitializedError(Exception):
 class NotInitializedError(Exception):
     pass
 
-_libsdm = ctypes.cdll.LoadLibrary('libsdm.so')
+#_libsdm = ctypes.cdll.LoadLibrary('libsdm.so')
+_libsdm = ctypes.cdll.LoadLibrary('.libs/libsdm.dylib')
 
 _libsdm.bs_alloc.restype = ctypes.POINTER(ctypes.c_void_p)
 _libsdm.bs_init_random.restype = ctypes.POINTER(ctypes.c_void_p)

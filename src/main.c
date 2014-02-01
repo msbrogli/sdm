@@ -9,21 +9,21 @@
 #include "core/bitstring.h"
 #include "core/memory.h"
 
-extern unsigned int bs_dimension;
-extern unsigned int sdm_sample;
+//extern unsigned int bs_dimension;
+//extern unsigned int sdm_sample;
 
 int tcp_listen();
 
 int main(void) {
 	printf("Sparse Distributed Memory\n");
 	printf("-------------------------\n");
-	printf("Dimensions: %u bits\n", bs_dimension);
-	printf("Sample: %u hard-locations\n", sdm_sample); 
-	printf("Lookup table: %d bits\n", BS_TABLE_SIZE);
+	//printf("Dimensions: %u bits\n", bs_dimension);
+	//printf("Sample: %u hard-locations\n", sdm_sample); 
+	//printf("Lookup table: %d bits\n", BS_TABLE_SIZE);
 	printf("\n");
 
 	printf("Initializing SDM... ");
-	//sdm_initialize();
+	sdm_initialize();
 	printf("ok\n");
 	printf("\n");
 

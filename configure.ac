@@ -2,10 +2,13 @@
 # Process this file with autoconf to produce a configure script.
 
 AC_PREREQ([2.69])
-AC_INIT([sdm-kanerva], [0.1], [msbrogli@vialink.com.br], [https://github.com/msbrogli/sdm])
+AC_INIT([sdm-msbrogli], [0.1], [msbrogli@vialink.com.br], [https://github.com/msbrogli/sdm])
 AM_INIT_AUTOMAKE
 AC_CONFIG_SRCDIR([src])
 AC_CONFIG_HEADERS([config.h])
+
+LT_INIT
+AC_CONFIG_MACRO_DIR([m4])
 
 # Checks for programs.
 AC_PROG_CC

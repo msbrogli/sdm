@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# Copied from memcached.
+# Adapted from memcached.
 # URL: https://github.com/memcached/memcached/blob/master/autogen.sh
 
 # Get the initial version.
@@ -26,6 +26,18 @@ locate_binary() {
   echo ""
   return 1
 }
+
+# URL: http://stackoverflow.com/a/15448876/465035
+case `uname` in Darwin*)
+    echo "glibtoolize..."
+    glibtoolize --copy || exit 1
+	;;
+*) 
+    echo "glibtoolize..."
+    libtoolize --copy || exit 1
+	;; 
+esac
+
 
 echo "aclocal..."
 if test x$ACLOCAL = x; then

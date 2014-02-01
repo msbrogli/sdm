@@ -18,7 +18,7 @@ extern adder_t* sdm_memory_adder;
 
 unsigned int sdm_thread_count = 4;
 
-inline void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
+void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
 	int qty, extra;
 	qty = sdm_sample/sdm_thread_count;
 	extra = sdm_sample%sdm_thread_count;
@@ -166,7 +166,7 @@ unsigned int sdm_thread_radius_count_intersect(bitstring* addr1, bitstring* addr
 	return counter;
 }
 
-inline void hl_write(adder_t* adder, bitstring* data) {
+void hl_write(adder_t* adder, bitstring* data) {
     int i, a;
     for(i=0; i<bs_dimension; i++) {
         a = bs_bitsign(data, i);
