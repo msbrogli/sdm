@@ -19,6 +19,9 @@ syntax: glob
 # Compiled tests
 tests/
 
+# Makefile dirstamp
+.dirstamp
+
 # Autotools auto-generated files
 .deps/
 autom4te.cache/
