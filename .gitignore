@@ -16,11 +16,11 @@ syntax: glob
 *.pyc
 *.pyo
 
-# Compiled tests
-tests/
-
-# Makefile dirstamp
+# Files generated after make
 .dirstamp
+.libs
+tests/
+main
 
 # Autotools auto-generated files
 .deps/
