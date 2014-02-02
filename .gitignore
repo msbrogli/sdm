@@ -16,7 +16,7 @@ syntax: glob
 *.pyc
 *.pyo
 
-# Autogen files
+# Autotools auto-generated files
 .deps/
 autom4te.cache/
 m4/
