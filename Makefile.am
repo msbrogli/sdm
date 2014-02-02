@@ -8,13 +8,13 @@ bin_PROGRAMS = main
 main_SOURCES = src/main.c
 main_LDADD = python/libsdm.la
 
-noinst_PROGRAMS = test_memory test_write
+noinst_PROGRAMS = tests/test_memory tests/test_write
 
-test_memory_SOURCES = src/tests/test_memory.c
-test_memory_LDADD = python/libsdm.la
+tests_test_memory_SOURCES = src/tests/test_memory.c
+tests_test_memory_LDADD = python/libsdm.la
 
-test_write_SOURCES = src/tests/test_write.c
-test_write_LDADD = python/libsdm.la
+tests_test_write_SOURCES = src/tests/test_write.c
+tests_test_write_LDADD = python/libsdm.la
 
 lib_LTLIBRARIES = python/libsdm.la
 python_libsdm_la_SOURCES = src/core/memory.c src/core/memory.h \

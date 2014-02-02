@@ -16,6 +16,9 @@ syntax: glob
 *.pyc
 *.pyo
 
+# Compiled tests
+tests/
+
 # Autotools auto-generated files
 .deps/
 autom4te.cache/
