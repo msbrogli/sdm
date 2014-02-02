@@ -111,29 +111,39 @@ int sdm_initialize_from_file(char* filename) {
 }
 */
 
-int sdm_initialize() {
-	unsigned int i;
-	unsigned int n;
+int sdm_initialize(struct sdm_memory *sdm) {
+	unsigned int i, n, sample;
+	sample = sdm->sample;
 
 	bs_initialize();
 
-	sdm_memory_address = (bitstring*) malloc(sizeof(bitstring)*bs_len*sdm_sample);
-	assert(sdm_memory_address != NULL);
+	// Alloc the addresses.
+	sdm->addresses = (bitstring*) malloc(sizeof(bitstring)*bs_len*sample);
+	if (sdm->addresses == NULL) {
+		return -1;
+	}
 
-	n = bs_dimension * sdm_sample;
-	sdm_memory_adder = (adder_t*) malloc(sizeof(adder_t)*n);
-	assert(sdm_memory_adder != NULL);
-	memset(sdm_memory_adder, 0, sizeof(adder_t)*n);
+	// Alloc the adders.
+	n = bs_dimension * sample;
+	sdm->adders = (adder_t*) malloc(sizeof(adder_t)*n);
+	if (sdm->adders == NULL) {
+		free(sdm->addresses);
+		return -1;
+	}
 
-	for(i=0; i<sdm_sample; i++) {
-		bs_init_random(get_sdm_memory_address(i));
+	// Reset the adders.
+	bzero(sdm->adders, sizeof(adder_t)*n);
+
+	// Generate random bitstring for the addresses of the hard-locations.
+	for(i=0; i < sample; i++) {
+		bs_init_random(get_sdm_memory_address(sdm, i));
 	}
 
 	return 0;
 }
 
-void sdm_free() {
-	free(sdm_memory_address);
-	free(sdm_memory_adder);
+void sdm_free(struct sdm_memory* sdm) {
+	free(sdm->addresses);
+	free(sdm->adders);
 }
 

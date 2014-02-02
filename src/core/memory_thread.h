@@ -8,6 +8,7 @@
 
 typedef struct {
 	int id;
+	struct sdm_memory* sdm;
 	bitstring* address;
 	bitstring* addr1;
 	bitstring* addr2;
@@ -19,10 +20,10 @@ typedef struct {
 } sdm_thread_params;
 
 // TODO comment
-unsigned int sdm_thread_radius_count(bitstring* address, unsigned int radius);
-unsigned int sdm_thread_radius_count_intersect(bitstring* addr1, bitstring* addr2, unsigned int radius);
-unsigned int sdm_thread_write(bitstring* address, bitstring* data);
-bitstring* sdm_thread_read(bitstring* address);
-void sdm_thread_distance(bitstring* address, unsigned int *res);
+unsigned int sdm_thread_radius_count(struct sdm_memory* sdm, bitstring* address, unsigned int radius);
+unsigned int sdm_thread_radius_count_intersect(struct sdm_memory* sdm, bitstring* addr1, bitstring* addr2, unsigned int radius);
+unsigned int sdm_thread_write(struct sdm_memory* sdm, bitstring* address, bitstring* data);
+bitstring* sdm_thread_read(struct sdm_memory* sdm, bitstring* address);
+void sdm_thread_distance(struct sdm_memory* sdm, bitstring* address, unsigned int *res);
 
 #endif

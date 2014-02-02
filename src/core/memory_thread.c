@@ -11,17 +11,14 @@
 
 extern unsigned int bs_len;
 extern unsigned int bs_dimension;
-extern unsigned int sdm_sample;
 extern unsigned int sdm_radius;
-extern bitstring* sdm_memory_address;
-extern adder_t* sdm_memory_adder;
 
 unsigned int sdm_thread_count = 4;
 
 void sdm_thread_offset(sdm_thread_params* params, unsigned int* id, unsigned int* offset, unsigned int* len) {
 	int qty, extra;
-	qty = sdm_sample/sdm_thread_count;
-	extra = sdm_sample%sdm_thread_count;
+	qty = (params->sdm->sample)/sdm_thread_count;
+	extra = (params->sdm->sample)%sdm_thread_count;
 	*id = params->id;
 	*len = qty + (*id < extra ? 1 : 0);
 	*offset = (*id)*qty + min(*id, extra);
@@ -37,7 +34,7 @@ void* sdm_thread_radius_count_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		dist = bs_distance(get_sdm_memory_address(offset+i), params->address);
+		dist = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->address);
 		if (dist <= params->radius) {
 			counter++;
 		}
@@ -47,12 +44,13 @@ void* sdm_thread_radius_count_task(void* ptr) {
 	return NULL;
 }
 
-unsigned int sdm_thread_radius_count(bitstring* address, unsigned int radius) {
+unsigned int sdm_thread_radius_count(struct sdm_memory* sdm, bitstring* address, unsigned int radius) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	unsigned int i, counter;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
+		params[i].sdm = sdm;
 		params[i].address = address;
 		params[i].radius = radius;
 		pthread_create(&thread[i], NULL, sdm_thread_radius_count_task, (void*) &params[i]);
@@ -77,10 +75,10 @@ void* sdm_thread_read_task(void* ptr) {
 
 	for(i=0; i<bs_dimension; i++) params->adder[i] = 0;
 	for(i=0; i<len; i++) {
-		dist = bs_distance(get_sdm_memory_address(offset+i), params->address);
+		dist = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->address);
 		if (dist <= sdm_radius) {
 			for(j=0; j<bs_dimension; j++) {
-				params->adder[j] += get_sdm_memory_adder(offset+i, j);
+				params->adder[j] += get_sdm_memory_adder(params->sdm, offset+i, j);
 			}
 			counter++;
 		}
@@ -90,7 +88,7 @@ void* sdm_thread_read_task(void* ptr) {
 	return NULL;
 }
 
-bitstring* sdm_thread_read(bitstring* address) {
+bitstring* sdm_thread_read(struct sdm_memory* sdm, bitstring* address) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	int32_t adder[sdm_thread_count][bs_dimension];
@@ -99,6 +97,7 @@ bitstring* sdm_thread_read(bitstring* address) {
 	unsigned int i, j;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
+		params[i].sdm = sdm;
 		params[i].address = address;
 		params[i].adder = adder[i];
 		pthread_create(&thread[i], NULL, sdm_thread_read_task, (void*) &params[i]);
@@ -134,8 +133,8 @@ void* sdm_thread_radius_count_intersect_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		d1 = bs_distance(get_sdm_memory_address(offset+i), params->addr1);
-		d2 = bs_distance(get_sdm_memory_address(offset+i), params->addr2);
+		d1 = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->addr1);
+		d2 = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->addr2);
 		if (d1 <= params->radius && d2 <= params->radius) {
 			counter++;
 		}
@@ -145,12 +144,13 @@ void* sdm_thread_radius_count_intersect_task(void* ptr) {
 	return NULL;
 }
 
-unsigned int sdm_thread_radius_count_intersect(bitstring* addr1, bitstring* addr2, unsigned int radius) {
+unsigned int sdm_thread_radius_count_intersect(struct sdm_memory* sdm, bitstring* addr1, bitstring* addr2, unsigned int radius) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	unsigned int i, counter;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
+		params[i].sdm = sdm;
 		params[i].addr1 = addr1;
 		params[i].addr2 = addr2;
 		params[i].radius = radius;
@@ -189,9 +189,9 @@ void* sdm_thread_write_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		dist = bs_distance(get_sdm_memory_address(offset+i), params->address);
+		dist = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->address);
 		if (dist <= sdm_radius) {
-			hl_write((adder_t*)&get_sdm_memory_adder(offset+i, 0), params->data);
+			hl_write((adder_t*)&get_sdm_memory_adder(params->sdm, offset+i, 0), params->data);
 			counter++;
 		}
 	}
@@ -200,12 +200,13 @@ void* sdm_thread_write_task(void* ptr) {
 	return NULL;
 }
 
-unsigned int sdm_thread_write(bitstring* address, bitstring* data) {
+unsigned int sdm_thread_write(struct sdm_memory* sdm, bitstring* address, bitstring* data) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	unsigned int i, counter;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
+		params[i].sdm = sdm;
 		params[i].address = address;
 		params[i].data = data;
 		pthread_create(&thread[i], NULL, sdm_thread_write_task, (void*) &params[i]);
@@ -228,18 +229,19 @@ void* sdm_thread_distance_task(void* ptr) {
 	sdm_thread_offset(params, &myid, &offset, &len);
 
 	for(i=0; i<len; i++) {
-		params->res[offset+i] = bs_distance(get_sdm_memory_address(offset+i), params->address);
+		params->res[offset+i] = bs_distance(get_sdm_memory_address(params->sdm, offset+i), params->address);
 	}
 
 	return NULL;
 }
 
-void sdm_thread_distance(bitstring* address, unsigned int *res) {
+void sdm_thread_distance(struct sdm_memory* sdm, bitstring* address, unsigned int *res) {
 	pthread_t thread[sdm_thread_count];
 	sdm_thread_params params[sdm_thread_count];
 	unsigned int i;
 	for(i=0; i<sdm_thread_count; i++) {
 		params[i].id = i;
+		params[i].sdm = sdm;
 		params[i].address = address;
 		params[i].res = res;
 		pthread_create(&thread[i], NULL, sdm_thread_distance_task, (void*) &params[i]);
