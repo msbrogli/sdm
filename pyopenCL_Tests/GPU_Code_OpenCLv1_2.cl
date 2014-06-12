@@ -151,8 +151,7 @@ __global ulong4 *bitstring, __global uint *activeHLs, __global uint *hamming_dis
  
 
 
-__kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_address,
-__global ulong4 *bitstring, __global int *distances)
+__kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_address, __global ulong4 *bitstring, __global int *distances)
 {
   __private uint mem_pos;
   __private ulong4 Aux;
@@ -162,6 +161,7 @@ __global ulong4 *bitstring, __global int *distances)
   Aux = HL_address[mem_pos] ^ bitstring[0];
   Aux = popcount(Aux);
   distances [mem_pos] = (uint) (Aux.s0+Aux.s1+Aux.s2+Aux.s3);
+
 }
 
 

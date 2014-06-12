@@ -44,7 +44,10 @@ def Get_Memory_Addresses_Buffer(ctx):
 	memory_addresses_buffer = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=Create_Memory_Addresses())
 	return memory_addresses_buffer
 
-
+def Get_Text_code(filename):
+	with open (filename, "r") as myfile:
+	    data = myfile.read()
+	    return data
 
 
 
@@ -56,19 +59,13 @@ bitstring_buffer = Get_Bitstring_Buffer(ctx)
 hamming_distances = Get_Hamming_Distances()
 distances_buffer = Get_Distances_Buffer(ctx)
 
-
- 
-
-
-start = time.time()
-
-
-from Get_GPU_Code import *  #Maybe we can construct the GPU code on-the-fly in the future...
-
 OpenCL_code = Get_Text_code ('GPU_Code_OpenCLv1_2.cl')
 
 import os
 os.environ['PYOPENCL_COMPILER_OUTPUT'] = '1'
+
+start = time.time()
+
 prg = cl.Program(ctx, OpenCL_code).build()
 
 from pyopencl.scan import GenericScanKernel
@@ -83,9 +80,7 @@ for x in range(num_times):
 
 
 err = cl.enqueue_read_buffer(queue, distances_buffer, hamming_distances).wait()
-print 'err in computing hamming_distances? --> ',err
-
-
+if err: print 'Error in computing hamming_distances? --> ',err
 
 time_elapsed = (time.time()-start)
 print 'Time to compute some Hamming distances', num_times,'times:', time_elapsed
@@ -97,7 +92,7 @@ print '\n Sum of distances at:', numpy.sum(hamming_distances)
 
 # RETRIEVE ACTIVE HARDLOCATIONS!
 #==================================
-
+'''
 from pyopencl.scan import GenericScanKernel
 
 knl = GenericScanKernel(
@@ -115,3 +110,4 @@ a_host = ary.get()
 out_host = a_host[a_host < 104]
 
 assert (out_host == out.get()[:len(out_host)]).all()
+'''

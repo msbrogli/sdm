@@ -15,7 +15,9 @@ knl = GenericScanKernel(
         scan_expr="a+b", neutral="0",
         output_statement="""if (prev_item != item) out[item-1] = ary[i];""")
 
-ary = cl.array.arange(queue, 10000, dtype=np.int32)
+
+rand = np.random.random_integers(0,2**10,size=(2**10)*8).astype(np.uint32) 
+ary = cl.array.arange(queue, 10000, dtype=np.uint32)
 print ary
 out = ary.copy()
 knl(ary, out)
