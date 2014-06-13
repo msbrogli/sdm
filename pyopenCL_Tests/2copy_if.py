@@ -8,8 +8,9 @@ context = cl.create_some_context()
 queue = cl.CommandQueue(context)
 mf = cl.mem_flags
 
+rand = cl_array.to_device (ctx, queue, numpy.random.randn(4,4).astype(np.int32))
 
-rand = np.random.random_integers(0,2**10,size=(2**10)*8).astype(np.int32) 
+#rand = np.random.random_integers(0,2**10,size=(2**10)*8).astype(np.int32) 
 
 print rand
 

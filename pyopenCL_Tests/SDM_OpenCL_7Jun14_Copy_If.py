@@ -5,35 +5,50 @@ import numpy.linalg as la
 import time
 
 
-DIMENSIONS = 256
+
 HARD_LOCATIONS = 2**20
-INT_SIZE = 256 
-NUM_INTS = DIMENSIONS/INT_SIZE # why?  Because N=256 / 32 bits (usando uint32)
-SIZE = HARD_LOCATIONS * NUM_INTS
-ACCESS_RADIUS_THRESHOLD = 100
+EXPECTED_NUM_HARD_LOCATIONS = 1200
+BIN_MULTIPLE = 160
+BIN_SIZE = EXPECTED_NUM_HARD_LOCATIONS * BIN_MULTIPLE 
+
+print "BIN_SIZE=", BIN_SIZE  #WHAT IS THE OPTIMUM BIN_SIZE??
+
+ACCESS_RADIUS_THRESHOLD = 104 #COMPUTE EXPECTED NUMBER OF ACTIVE HARD LOCATIONS
+
+
 
 numpy.random.seed(seed=12345678)  
 
-semaphor = numpy.zeros(2).astype(numpy.uint32) 
+#semaphor = numpy.zeros(2).astype(numpy.uint32) 
 
 ctx = cl.create_some_context()
 queue = cl.CommandQueue(ctx)
 mem_flags = cl.mem_flags
 
 
+def Get_Bin_Active_Indexes():
+	bin_active_index = numpy.zeros(BIN_SIZE).astype(numpy.uint32) 
+	return bin_active_index
+
+def Get_Bin_Active_Indexes_GPU_Buffer(ctx):
+	bin_active_index = Get_Bin_Active_Indexes()
+	bin_active_index_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=bin_active_index)
+	return bin_active_index_gpu
+
 def Get_Hamming_Distances():
-	hamming_distances = numpy.zeros(2**20).astype(numpy.int32) 
+	hamming_distances = numpy.zeros(HARD_LOCATIONS).astype(numpy.uint32) 
+	hamming_distances[0] = ACCESS_RADIUS_THRESHOLD
 	return hamming_distances
 
-def Get_Distances_Buffer(ctx):
-	Distances = Get_Hamming_Distances()
-	hamming_distances_buffer = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=hamming_distances)
-	return hamming_distances_buffer
+def Get_Distances_GPU_Buffer(ctx):
+	Distances = Get_Hamming_Distances() 
+	hamming_distances_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=Distances) 
+	return hamming_distances_gpu
 
-def Get_Bitstring_Buffer(ctx):
+def Get_Bitstring_GPU_Buffer(ctx):
 	bitstring = numpy.random.random_integers(0,2**32,size=8).astype(numpy.uint32)
-	bitstring_buffer = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=bitstring)
-	return bitstring_buffer
+	bitstring_gpu = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=bitstring)
+	return bitstring_gpu
 
 def Create_Memory_Addresses():
 	memory_addresses = numpy.random.random_integers(0,2**32,size=(2**20)*8).astype(numpy.uint32)
@@ -41,23 +56,21 @@ def Create_Memory_Addresses():
 
 def Get_Memory_Addresses_Buffer(ctx):
 	memory_addresses = Create_Memory_Addresses() 	
-	memory_addresses_buffer = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=Create_Memory_Addresses())
-	return memory_addresses_buffer
+	memory_addresses_gpu = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=memory_addresses)
+	return memory_addresses_gpu
 
 def Get_Text_code(filename):
 	with open (filename, "r") as myfile:
 	    data = myfile.read()
 	    return data
 
+bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
+memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
+distances_gpu = Get_Distances_GPU_Buffer(ctx)
+
+bitstring_gpu = Get_Bitstring_GPU_Buffer(ctx)
 
 
-memory_addresses = Create_Memory_Addresses()
-memory_addresses_buffer = Get_Memory_Addresses_Buffer(ctx)
-
-bitstring_buffer = Get_Bitstring_Buffer(ctx)
-
-hamming_distances = Get_Hamming_Distances()
-distances_buffer = Get_Distances_Buffer(ctx)
 
 OpenCL_code = Get_Text_code ('GPU_Code_OpenCLv1_2.cl')
 
@@ -68,27 +81,78 @@ start = time.time()
 
 prg = cl.Program(ctx, OpenCL_code).build()
 
-from pyopencl.scan import GenericScanKernel
+#from pyopencl.scan import GenericScanKernel
+bin_active_index = Get_Bin_Active_Indexes()
+hamming_distances = Get_Hamming_Distances()
+
+
+print "\n\n\n"
+
+Results = numpy.zeros(BIN_SIZE).astype(numpy.uint32) 
+
+#bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 
 start = time.time()
-num_times = 200
+num_times = 2000
 for x in range(num_times):
-	prg.compute_hammings_hard_locations_256bits(queue, (HARD_LOCATIONS,), None, memory_addresses_buffer, bitstring_buffer, distances_buffer).wait()  
+	
+
+
+	bitstring_gpu = Get_Bitstring_GPU_Buffer(ctx)
+	
+
+	err = prg.clear_bin_active_indexes_gpu(queue, (BIN_SIZE,), None, bin_active_index_gpu).wait()
+
+	err = prg.get_active_hard_locations(queue, (HARD_LOCATIONS,), None, memory_addresses_gpu, bitstring_gpu, distances_gpu, bin_active_index_gpu).wait()  
+	if err: print 'Error --> ',err
+
+	
+	bin_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
+
+
+	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, bin_active_index).wait()
+	if err: print 'Error in retrieving bin_active_index? --> ',err
+
+	
+	bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
+	#print bin_active_index
+	active = numpy.size(bin_active_index)
+	print "Found ", active, "active locations"
+	Results[x] = active
+	
+
+
+
+	#prg.compute_hammings_hard_locations_256bits(queue, (HARD_LOCATIONS,), None, memory_addresses_gpu, bitstring_gpu, distances_gpu).wait()  
+	
+
+
+
 	time_elapsed = (time.time()-start)
-	if (x%100==0): print x, time_elapsed
+	if (x%1==0): print x, time_elapsed, "\n\n"
   
+#bin_active_index = Get_Bin_Active_Indexes()
+#hamming_distances = Get_Hamming_Distances()
 
+err = cl.enqueue_read_buffer(queue, distances_gpu, hamming_distances).wait()
+if err: print 'Error in retrieving hamming_distances? --> ',err
 
-err = cl.enqueue_read_buffer(queue, distances_buffer, hamming_distances).wait()
-if err: print 'Error in computing hamming_distances? --> ',err
+err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, bin_active_index).wait()
+if err: print 'Error in retrieving bin_active_index? --> ',err
+bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
+
 
 time_elapsed = (time.time()-start)
+
+
+print hamming_distances[bin_active_index]
+
+
 print 'Time to compute some Hamming distances', num_times,'times:', time_elapsed
 
-#numpy.set_printoptions(threshold='nan')
-#print hamming_distances
-print '\n Sum of distances at:', numpy.sum(hamming_distances)
-
+sum = numpy.sum(bin_active_index)
+print '\n Sum of active locations = ', sum
+print "error =", sum-4036812
 
 # RETRIEVE ACTIVE HARDLOCATIONS!
 #==================================
