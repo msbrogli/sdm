@@ -8,8 +8,7 @@ import time
 
 HARD_LOCATIONS = 2**20
 EXPECTED_NUM_HARD_LOCATIONS = 1250
-#BIN_MULTIPLE = 180   29218759
-BIN_SIZE = 25013
+BIN_SIZE = 25013 #Must be a prime number in the OpenCL code
 
 print "BIN_SIZE=", BIN_SIZE  #WHAT IS THE OPTIMUM BIN_SIZE??
 
@@ -18,8 +17,6 @@ ACCESS_RADIUS_THRESHOLD = 104 #COMPUTE EXPECTED NUMBER OF ACTIVE HARD LOCATIONS
 
 
 numpy.random.seed(seed=12345678)  
-
-#semaphor = numpy.zeros(2).astype(numpy.uint32) 
 
 ctx = cl.create_some_context()
 queue = cl.CommandQueue(ctx)
@@ -86,7 +83,7 @@ bin_active_index = Get_Bin_Active_Indexes()
 hamming_distances = Get_Hamming_Distances()
 
 
-print "\n\n\n"
+print "\n\n\n\n\n\n\n"
 
 Results = numpy.zeros(BIN_SIZE).astype(numpy.uint32) 
 
@@ -115,9 +112,9 @@ for x in range(num_times):
 
 	
 	bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
-	print bin_active_index
+	#print bin_active_index
 	active = numpy.size(bin_active_index)
-	print "\nFound ", active, "active locations"
+	#print "\nFound ", active, "active locations"
 	Results[x] = active
 	
 
@@ -133,7 +130,7 @@ for x in range(num_times):
 
 print Results[Results !=0].min(), " the minimum should be 980"
 print Results[Results !=0].mean(), "the mean should be 1094.7665"
-print Results[Results !=0].max(), "the max should be 1220\n\n\n\n\n\n"
+print Results[Results !=0].max(), "the max should be 1220\n"
   
 #bin_active_index = Get_Bin_Active_Indexes()
 #hamming_distances = Get_Hamming_Distances()
@@ -155,7 +152,7 @@ print hamming_distances[bin_active_index]
 print 'Time to compute some Hamming distances', num_times,'times:', time_elapsed
 
 sum = numpy.sum(bin_active_index)
-print '\n Sum of active locations = ', sum, "error =", sum-29218759
+print '\n Sum of active locations = ', sum, "error =", sum-29218759, "\n\n\n\n"
 
 # RETRIEVE ACTIVE HARDLOCATIONS!
 #==================================
