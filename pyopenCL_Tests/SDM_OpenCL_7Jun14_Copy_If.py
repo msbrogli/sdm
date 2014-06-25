@@ -8,9 +8,12 @@ import time
 
 HARD_LOCATIONS = 2**20
 EXPECTED_NUM_HARD_LOCATIONS = 1250
-BIN_SIZE = 25033 #Must be a prime number in the OpenCL code
+HASH_TABLE_SIZE =  12043 # 25033 #12043  #Must be a prime number in the OpenCL code
 
-print "BIN_SIZE=", BIN_SIZE  #WHAT IS THE OPTIMUM BIN_SIZE??
+# HASH_TABLE_SIZE must be prime.  The higher it is, the more bandwidth, but way less collisions.
+
+
+print "HASH_TABLE_SIZE=", HASH_TABLE_SIZE  #WHAT IS THE OPTIMUM HASH_TABLE_SIZE??
 
 ACCESS_RADIUS_THRESHOLD = 104 #COMPUTE EXPECTED NUMBER OF num_ACTIVE_locations_found HARD LOCATIONS
 
@@ -24,7 +27,7 @@ mem_flags = cl.mem_flags
 
 
 def Get_Bin_Active_Indexes():
-	bin_active_index = numpy.zeros(BIN_SIZE).astype(numpy.uint32) 
+	bin_active_index = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
 	return bin_active_index
 
 def Get_Bin_Active_Indexes_GPU_Buffer(ctx):
@@ -91,9 +94,9 @@ bin_active_index = Get_Bin_Active_Indexes()
 hamming_distances = Get_Hamming_Distances()
 
 
-print "\n\n\n\n\n\n\n"
+print "\n\n"
 
-Results = numpy.zeros(BIN_SIZE).astype(numpy.uint32) 
+Results = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
 
 #bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 
@@ -101,12 +104,9 @@ start = time.time()
 num_times = 2000
 for x in range(num_times):
 	
-
-
 	bitstring_gpu = Get_Bitstring_GPU_Buffer(ctx)
 	
-
-	err = prg.clear_bin_active_indexes_gpu(queue, (BIN_SIZE,), None, bin_active_index_gpu).wait()
+	err = prg.clear_bin_active_indexes_gpu(queue, (HASH_TABLE_SIZE,), None, bin_active_index_gpu).wait()
 
 	err = prg.get_active_hard_locations(queue, (HARD_LOCATIONS,), None, memory_addresses_gpu, bitstring_gpu, distances_gpu, bin_active_index_gpu).wait()  
 	if err: print 'Error --> ',err
@@ -135,10 +135,11 @@ for x in range(num_times):
 
 time_elapsed = (time.time()-start)
 
-print
+mean  = Results[Results !=0].mean()
+
 print Results[Results !=0].min(), " the minimum of HLs found should be 980"
-print Results[Results !=0].mean(), "the mean of HLs found should be 1094.7665"
-print Results[Results !=0].max(), "the max of HLs found should be 1220\n"
+print mean, "the mean of HLs found should be 1094.7665"
+print Results[Results !=0].max(), "the max of HLs found should be 1220"
 
 
 print numpy.size(bin_active_index)
@@ -152,13 +153,14 @@ print '\nTime to compute some Hamming distances', num_times,'times:', time_elaps
 # why bin?  sum = numpy.sum(bin_active_index)
 sum = numpy.sum(Results)
 
-print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-2238070, "\n\n\n\n"
+print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-2238071, "\n"
+print 'expected HLs missed per scan is', (2238071-sum)/num_times
 
 # 2189533 single hashing in OpenCL code
 # 2236635 double-hashing in OpenCL code
 # 2238019 triple-hashing in OpenCL code
 # 2238069 quadruple-hashing in OpenCL code
-# 2238070 quintuple-hashing in OpenCL code
+# 2238071 quintuple-hashing in OpenCL code
 
 
 # RETRIEVE num_ACTIVE_locations_found HARDLOCATIONS!
