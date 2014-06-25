@@ -5,7 +5,7 @@
 //#pragma OPENCL EXTENSION cl_khr_local_int32_base_atomics : enable
 //#pragma OPENCL EXTENSION cl_khr_int64_base_atomics : enable
 
-#define BIN_SIZE 192000
+#define BIN_SIZE 25013
 #define ACCESS_RADIUS_THRESHOLD 104
 
 
@@ -31,13 +31,14 @@ __kernel void get_active_hard_locations(__global ulong4 *HL_address, __global ul
 
 }
 
-
 __kernel void clear_bin_active_indexes_gpu(__global uint *bin_active_index_gpu)
 {
   __private uint gid;
   gid = get_global_id(0);
   bin_active_index_gpu[gid]=0;
 }
+
+
 
 /*
 void GetSemaphor(__global int *semaphor);

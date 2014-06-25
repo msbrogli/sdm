@@ -7,9 +7,9 @@ import time
 
 
 HARD_LOCATIONS = 2**20
-EXPECTED_NUM_HARD_LOCATIONS = 1200
-BIN_MULTIPLE = 160
-BIN_SIZE = EXPECTED_NUM_HARD_LOCATIONS * BIN_MULTIPLE 
+EXPECTED_NUM_HARD_LOCATIONS = 1250
+#BIN_MULTIPLE = 180   29218759
+BIN_SIZE = 25013
 
 print "BIN_SIZE=", BIN_SIZE  #WHAT IS THE OPTIMUM BIN_SIZE??
 
@@ -115,9 +115,9 @@ for x in range(num_times):
 
 	
 	bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
-	#print bin_active_index
+	print bin_active_index
 	active = numpy.size(bin_active_index)
-	print "Found ", active, "active locations"
+	print "\nFound ", active, "active locations"
 	Results[x] = active
 	
 
@@ -129,7 +129,11 @@ for x in range(num_times):
 
 
 	time_elapsed = (time.time()-start)
-	if (x%1==0): print x, time_elapsed, "\n\n"
+	#if (x%1==0): print x, time_elapsed, "\n\n"
+
+print Results[Results !=0].min(), " the minimum should be 980"
+print Results[Results !=0].mean(), "the mean should be 1094.7665"
+print Results[Results !=0].max(), "the max should be 1220\n\n\n\n\n\n"
   
 #bin_active_index = Get_Bin_Active_Indexes()
 #hamming_distances = Get_Hamming_Distances()
@@ -151,8 +155,7 @@ print hamming_distances[bin_active_index]
 print 'Time to compute some Hamming distances', num_times,'times:', time_elapsed
 
 sum = numpy.sum(bin_active_index)
-print '\n Sum of active locations = ', sum
-print "error =", sum-4036812
+print '\n Sum of active locations = ', sum, "error =", sum-29218759
 
 # RETRIEVE ACTIVE HARDLOCATIONS!
 #==================================
