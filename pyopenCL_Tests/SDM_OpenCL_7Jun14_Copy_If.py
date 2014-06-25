@@ -27,12 +27,12 @@ mem_flags = cl.mem_flags
 
 
 def Get_Bin_Active_Indexes():
-	bin_active_index = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
-	return bin_active_index
+	hash_table_active_index = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
+	return hash_table_active_index
 
 def Get_Bin_Active_Indexes_GPU_Buffer(ctx):
-	bin_active_index = Get_Bin_Active_Indexes()
-	bin_active_index_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=bin_active_index)
+	hash_table_active_index = Get_Bin_Active_Indexes()
+	bin_active_index_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=hash_table_active_index)
 	return bin_active_index_gpu
 
 def Get_Hamming_Distances():
@@ -45,8 +45,13 @@ def Get_Distances_GPU_Buffer(ctx):
 	hamming_distances_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=Distances) 
 	return hamming_distances_gpu
 
-def Get_Bitstring_GPU_Buffer(ctx):
+def Get_Random_Bitstring():
 	bitstring = numpy.random.random_integers(0,2**32,size=8).astype(numpy.uint32)
+	return bitstring
+
+
+def Get_Bitstring_GPU_Buffer(ctx):
+	bitstring = Get_Random_Bitstring()
 	bitstring_gpu = cl.Buffer(ctx, mem_flags.READ_ONLY | mem_flags.COPY_HOST_PTR, hostbuf=bitstring)
 	return bitstring_gpu
 
@@ -65,6 +70,28 @@ def Get_Text_code(filename):
 	    return data
 
 
+def Get_Active_Locations(bitstring, ctx):
+	bitstring_gpu = Get_Bitstring_GPU_Buffer(ctx)
+	
+	err = prg.clear_bin_active_indexes_gpu(queue, (HASH_TABLE_SIZE,), None, bin_active_index_gpu).wait()
+
+	err = prg.get_active_hard_locations(queue, (HARD_LOCATIONS,), None, memory_addresses_gpu, bitstring_gpu, distances_gpu, bin_active_index_gpu).wait()  
+	if err: print 'Error --> ',err
+
+	
+	hash_table_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
+
+
+	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, hash_table_active_index).wait()
+	if err: print 'Error in retrieving hash_table_active_index? --> ',err
+
+	# Removing zeros from hash_table_active_index, 2 options:
+	# option 1: use numpy masked arrays
+	# hash_table_active_index = numpy.ma.masked_equal(hash_table_active_index,0).compressed()
+	# option 2: a[a != 0]
+	hash_table_active_index = hash_table_active_index[hash_table_active_index!=0]
+	return hash_table_active_index
+
 
 
 
@@ -76,9 +103,6 @@ bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
 distances_gpu = Get_Distances_GPU_Buffer(ctx)
 
-bitstring_gpu = Get_Bitstring_GPU_Buffer(ctx)
-
-
 
 OpenCL_code = Get_Text_code ('GPU_Code_OpenCLv1_2.cl')
 
@@ -89,8 +113,7 @@ start = time.time()
 
 prg = cl.Program(ctx, OpenCL_code).build()
 
-#from pyopencl.scan import GenericScanKernel
-bin_active_index = Get_Bin_Active_Indexes()
+hash_table_active_index = Get_Bin_Active_Indexes()
 hamming_distances = Get_Hamming_Distances()
 
 
@@ -98,7 +121,6 @@ print "\n\n"
 
 Results = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
 
-#bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 
 start = time.time()
 num_times = 2000
@@ -112,21 +134,21 @@ for x in range(num_times):
 	if err: print 'Error --> ',err
 
 	
-	bin_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
+	hash_table_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
 
 
-	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, bin_active_index).wait()
-	if err: print 'Error in retrieving bin_active_index? --> ',err
+	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, hash_table_active_index).wait()
+	if err: print 'Error in retrieving hash_table_active_index? --> ',err
 
-	# Removing zeros from bin_active_index, 2 options:
+	# Removing zeros from hash_table_active_index, 2 options:
 	# option 1: use numpy masked arrays
-	# bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
+	# hash_table_active_index = numpy.ma.masked_equal(hash_table_active_index,0).compressed()
 	# option 2: a[a != 0]
-	bin_active_index = bin_active_index[bin_active_index!=0]
+	hash_table_active_index = hash_table_active_index[hash_table_active_index!=0]
 	
 
-	#print bin_active_index
-	num_active_locations_found = numpy.size(bin_active_index)
+	#print hash_table_active_index
+	num_active_locations_found = numpy.size(hash_table_active_index)
 	#print  "num_active_locations_found=", num_active_locations_found
 	Results[x] = num_active_locations_found
 	
@@ -142,25 +164,23 @@ print mean, "the mean of HLs found should be 1094.7665"
 print Results[Results !=0].max(), "the max of HLs found should be 1220"
 
 
-print numpy.size(bin_active_index)
+print numpy.size(hash_table_active_index)
 
-print bin_active_index
+print hash_table_active_index
 
-print hamming_distances[bin_active_index]
+print hamming_distances[hash_table_active_index]
 
 print '\nTime to compute some Hamming distances', num_times,'times:', time_elapsed
 
-# why bin?  sum = numpy.sum(bin_active_index)
 sum = numpy.sum(Results)
 
-print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-2238071, "\n"
-print 'expected HLs missed per scan is', (2238071-sum)/num_times
 
-# 2189533 single hashing in OpenCL code
-# 2236635 double-hashing in OpenCL code
-# 2238019 triple-hashing in OpenCL code
-# 2238069 quadruple-hashing in OpenCL code
-# 2238071 quintuple-hashing in OpenCL code
+# multiple-hashing in OpenCL code
+usual_result = 2238154
+print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-usual_result, "\n"
+print 'expected HLs missed per scan is', (usual_result-sum)/num_times
+
+
 
 
 # RETRIEVE num_ACTIVE_locations_found HARDLOCATIONS!
