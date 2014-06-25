@@ -8,11 +8,11 @@ import time
 
 HARD_LOCATIONS = 2**20
 EXPECTED_NUM_HARD_LOCATIONS = 1250
-BIN_SIZE = 25013 #Must be a prime number in the OpenCL code
+BIN_SIZE = 25033 #Must be a prime number in the OpenCL code
 
 print "BIN_SIZE=", BIN_SIZE  #WHAT IS THE OPTIMUM BIN_SIZE??
 
-ACCESS_RADIUS_THRESHOLD = 104 #COMPUTE EXPECTED NUMBER OF ACTIVE HARD LOCATIONS
+ACCESS_RADIUS_THRESHOLD = 104 #COMPUTE EXPECTED NUMBER OF num_ACTIVE_locations_found HARD LOCATIONS
 
 
 
@@ -60,6 +60,14 @@ def Get_Text_code(filename):
 	with open (filename, "r") as myfile:
 	    data = myfile.read()
 	    return data
+
+
+
+
+
+
+
+
 
 bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
@@ -110,51 +118,50 @@ for x in range(num_times):
 	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, bin_active_index).wait()
 	if err: print 'Error in retrieving bin_active_index? --> ',err
 
+	# Removing zeros from bin_active_index, 2 options:
+	# option 1: use numpy masked arrays
+	# bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
+	# option 2: a[a != 0]
+	bin_active_index = bin_active_index[bin_active_index!=0]
 	
-	bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
+
 	#print bin_active_index
-	active = numpy.size(bin_active_index)
-	#print "\nFound ", active, "active locations"
-	Results[x] = active
+	num_active_locations_found = numpy.size(bin_active_index)
+	#print  "num_active_locations_found=", num_active_locations_found
+	Results[x] = num_active_locations_found
 	
-
-
-
-	#prg.compute_hammings_hard_locations_256bits(queue, (HARD_LOCATIONS,), None, memory_addresses_gpu, bitstring_gpu, distances_gpu).wait()  
-	
-
-
-
 	time_elapsed = (time.time()-start)
 	#if (x%1==0): print x, time_elapsed, "\n\n"
 
-print Results[Results !=0].min(), " the minimum should be 980"
-print Results[Results !=0].mean(), "the mean should be 1094.7665"
-print Results[Results !=0].max(), "the max should be 1220\n"
-  
-#bin_active_index = Get_Bin_Active_Indexes()
-#hamming_distances = Get_Hamming_Distances()
-
-err = cl.enqueue_read_buffer(queue, distances_gpu, hamming_distances).wait()
-if err: print 'Error in retrieving hamming_distances? --> ',err
-
-err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, bin_active_index).wait()
-if err: print 'Error in retrieving bin_active_index? --> ',err
-bin_active_index = numpy.ma.masked_equal(bin_active_index,0).compressed()
-
-
 time_elapsed = (time.time()-start)
 
+print
+print Results[Results !=0].min(), " the minimum of HLs found should be 980"
+print Results[Results !=0].mean(), "the mean of HLs found should be 1094.7665"
+print Results[Results !=0].max(), "the max of HLs found should be 1220\n"
+
+
+print numpy.size(bin_active_index)
+
+print bin_active_index
 
 print hamming_distances[bin_active_index]
 
+print '\nTime to compute some Hamming distances', num_times,'times:', time_elapsed
 
-print 'Time to compute some Hamming distances', num_times,'times:', time_elapsed
+# why bin?  sum = numpy.sum(bin_active_index)
+sum = numpy.sum(Results)
 
-sum = numpy.sum(bin_active_index)
-print '\n Sum of active locations = ', sum, "error =", sum-29218759, "\n\n\n\n"
+print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-2238070, "\n\n\n\n"
 
-# RETRIEVE ACTIVE HARDLOCATIONS!
+# 2189533 single hashing in OpenCL code
+# 2236635 double-hashing in OpenCL code
+# 2238019 triple-hashing in OpenCL code
+# 2238069 quadruple-hashing in OpenCL code
+# 2238070 quintuple-hashing in OpenCL code
+
+
+# RETRIEVE num_ACTIVE_locations_found HARDLOCATIONS!
 #==================================
 '''
 from pyopencl.scan import GenericScanKernel
