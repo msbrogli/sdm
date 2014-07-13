@@ -26,18 +26,17 @@ queue = cl.CommandQueue(ctx)
 mem_flags = cl.mem_flags
 
 
-def Get_Bin_Active_Indexes():
+def Get_Hash_Table():
 	hash_table_active_index = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
 	return hash_table_active_index
 
-def Get_Bin_Active_Indexes_GPU_Buffer(ctx):
-	hash_table_active_index = Get_Bin_Active_Indexes()
+def Get_Hash_Table_GPU_Buffer(ctx):
+	hash_table_active_index = Get_Hash_Table()
 	bin_active_index_gpu = cl.Buffer(ctx, mem_flags.READ_WRITE | mem_flags.COPY_HOST_PTR, hostbuf=hash_table_active_index)
 	return bin_active_index_gpu
 
 def Get_Hamming_Distances():
 	hamming_distances = numpy.zeros(HARD_LOCATIONS).astype(numpy.uint32) 
-	#hamming_distances[0] = ACCESS_RADIUS_THRESHOLD
 	return hamming_distances
 
 def Get_Distances_GPU_Buffer(ctx):
@@ -79,7 +78,7 @@ def Get_Active_Locations(bitstring, ctx):
 	if err: print 'Error --> ',err
 
 	
-	hash_table_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
+	hash_table_active_index = Get_Hash_Table() #THIS IS SLOWING EVERYTHING!
 
 
 	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, hash_table_active_index).wait()
@@ -99,7 +98,7 @@ def Get_Active_Locations(bitstring, ctx):
 
 
 
-bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
+bin_active_index_gpu = Get_Hash_Table_GPU_Buffer(ctx)
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
 distances_gpu = Get_Distances_GPU_Buffer(ctx)
 
@@ -113,7 +112,7 @@ start = time.time()
 
 prg = cl.Program(ctx, OpenCL_code).build()
 
-hash_table_active_index = Get_Bin_Active_Indexes()
+hash_table_active_index = Get_Hash_Table()
 hamming_distances = Get_Hamming_Distances()
 
 
@@ -133,7 +132,7 @@ for x in range(num_times):
 	if err: print 'Error --> ',err
 
 	
-	hash_table_active_index = Get_Bin_Active_Indexes() #THIS IS SLOWING EVERYTHING!
+	hash_table_active_index = Get_Hash_Table() #THIS IS SLOWING EVERYTHING!
 
 
 	err = cl.enqueue_read_buffer(queue, bin_active_index_gpu, hash_table_active_index).wait()
