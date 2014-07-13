@@ -37,7 +37,7 @@ def Get_Bin_Active_Indexes_GPU_Buffer(ctx):
 
 def Get_Hamming_Distances():
 	hamming_distances = numpy.zeros(HARD_LOCATIONS).astype(numpy.uint32) 
-	hamming_distances[0] = ACCESS_RADIUS_THRESHOLD
+	#hamming_distances[0] = ACCESS_RADIUS_THRESHOLD
 	return hamming_distances
 
 def Get_Distances_GPU_Buffer(ctx):
@@ -117,10 +117,9 @@ hash_table_active_index = Get_Bin_Active_Indexes()
 hamming_distances = Get_Hamming_Distances()
 
 
-print "\n\n"
+print "\n"
 
 Results = numpy.zeros(HASH_TABLE_SIZE).astype(numpy.uint32) 
-
 
 start = time.time()
 num_times = 2000
