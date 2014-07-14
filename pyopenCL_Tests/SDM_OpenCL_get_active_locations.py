@@ -8,7 +8,7 @@ import time
 
 HARD_LOCATIONS = 2**20
 EXPECTED_NUM_HARD_LOCATIONS = 1250
-HASH_TABLE_SIZE =  12043 # 25033 #12043  #Must be a prime number in the OpenCL code
+HASH_TABLE_SIZE =  25033 # 12043 # 25033 #12043  #Must be a prime number in the OpenCL code
 
 # HASH_TABLE_SIZE must be prime.  The higher it is, the more bandwidth, but way less collisions.
 
@@ -174,7 +174,7 @@ sum = numpy.sum(Results)
 
 
 # multiple-hashing in OpenCL code
-usual_result = 2238154
+usual_result = 2238155
 print '\n Sum of num_active_locations_found locations = ', sum, "error =", sum-usual_result, "\n"
 print 'expected HLs missed per scan is', (usual_result-sum)/num_times
 
