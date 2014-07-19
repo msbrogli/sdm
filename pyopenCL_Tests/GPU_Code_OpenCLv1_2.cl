@@ -62,21 +62,12 @@ __kernel void get_active_hard_locations(__global ulong4 *HL_address, __global ul
   }
 }
 
-
-
-
-
-
 __kernel void clear_bin_active_indexes_gpu(__global uint *bin_active_index_gpu)
 {
   __private uint gid;
   gid = get_global_id(0);
   bin_active_index_gpu[gid]=0;
 }
-
-
-
-
 
 
 __kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_address, __global ulong4 *bitstring, __global uint *distances)
@@ -90,3 +81,76 @@ __kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_addres
   Aux = popcount(Aux);
   distances [mem_pos] = (uint) (Aux.s0+Aux.s1+Aux.s2+Aux.s3);
 }
+
+/* Implement full read & write to Hard_locations
+/* try pragma unroll here
+
+inline int bs_bit(bitstring* a, int bit) {
+  int i = bit/64, j = bit%64;
+  return (a[bs_len-1-i]&((uint64_t)1<<j) ? 1 : 0);
+}
+
+int bs_bitsign(bitstring* a, int bit) {
+  return (bs_bit(a, bit) ? 1 : -1);
+}
+
+void hl_write(hardlocation* hl, bitstring* data) {
+  int i, a;
+  for(i=0; i<bs_dimension; i++) {
+    a = bs_bitsign(data, i);
+    if (a > 0) {
+      if (hl->adder[i] < 127) hl->adder[i]++;
+      else printf("@@ WARNING adder[%d] overflow!\n", i);
+    } else if (a < 0) {
+      if (hl->adder[i] > -127) hl->adder[i]--;
+      else printf("@@ WARNING adder[%d] overflow!\n", i);
+    }
+  }
+}
+
+bitstring* hl_read(hardlocation* hl) {
+  return bs_init_adder(bs_alloc(), hl->adder);
+}
+
+unsigned int sdm_write(bitstring* address, bitstring* data) {
+  unsigned int i, counter = 0;
+  unsigned int dist;
+  for(i=0; i<sdm_sample; i++) {
+    dist = bs_distance(sdm_memory[i]->address, address);
+    if (dist <= sdm_radius) {
+      hl_write(sdm_memory[i], data);
+      counter++;
+    }
+  }
+  //printf("Hardlocations inside radius %d = %d\n", sdm_radius, counter);
+  return counter;
+}
+
+bitstring* sdm_read(bitstring* address) {
+  unsigned int i, j, counter = 0;
+  unsigned int dist;
+  int32_t adder[bs_dimension];
+  adder_t adder2[bs_dimension];
+  memset(adder, 0, sizeof(adder));
+  for(i=0; i<sdm_sample; i++) {
+    dist = bs_distance(sdm_memory[i]->address, address);
+    if (dist <= sdm_radius) {
+      for(j=0; j<bs_dimension; j++) {
+        adder[j] += sdm_memory[i]->adder[j];
+      }
+      counter++;
+    }
+  }
+  // we can't add all adders in an adder_t type because
+  // it will probably overflow.
+  for(i=0; i<bs_dimension; i++) {
+    if (adder[i] > 0) adder2[i] = 1;
+    else if (adder[i] < 0) adder2[i] = -1;
+    else adder2[i] = (rand()%2 == 0 ? 1 : -1);
+  }
+  //printf("Hardlocation inside radius %d = %d\n", sdm_radius, counter);
+  return bs_init_adder(bs_alloc(), adder2);
+}
+
+*/ 
+
