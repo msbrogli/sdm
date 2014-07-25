@@ -1,7 +1,8 @@
 
 //For N=256 use ulong4, if N=1024 use ulong16.
 
-/*
+
+
 #define HASH_TABLE_SIZE 25033
 #define HASH_TABLE_SIZE2 25032
 #define HASH_TABLE_SIZE3 25031
@@ -9,8 +10,22 @@
 #define HASH_TABLE_SIZE5 25029
 #define HASH_TABLE_SIZE6 25028
 #define HASH_TABLE_SIZE7 25027
+
+
+/*
+
+
+#define HASH_TABLE_SIZE 48781
+#define HASH_TABLE_SIZE2 48780
+#define HASH_TABLE_SIZE3 48779
+#define HASH_TABLE_SIZE4 48778
+#define HASH_TABLE_SIZE5 48777
+#define HASH_TABLE_SIZE6 48776
+#define HASH_TABLE_SIZE7 48775
 */
 
+
+/*
 #define HASH_TABLE_SIZE 12043
 #define HASH_TABLE_SIZE2 12042
 #define HASH_TABLE_SIZE3 12041
@@ -18,6 +33,7 @@
 #define HASH_TABLE_SIZE5 12039
 #define HASH_TABLE_SIZE6 12038
 #define HASH_TABLE_SIZE7 12037
+*/
 
 // HASH_TABLE_SIZE must be prime.  The higher it is, the more bandwidth, but less collisions.  It should also be "far" from a power of 2. 
 
@@ -63,20 +79,12 @@ __kernel void get_active_hard_locations(__global ulong4 *HL_address, __global ul
 }
 
 
-
-
-
-
 __kernel void clear_bin_active_indexes_gpu(__global uint *bin_active_index_gpu)
 {
   __private uint gid;
   gid = get_global_id(0);
   bin_active_index_gpu[gid]=0;
 }
-
-
-
-
 
 
 __kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_address, __global ulong4 *bitstring, __global uint *distances)

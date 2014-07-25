@@ -8,7 +8,7 @@ import time
 
 HARD_LOCATIONS = 2**20
 EXPECTED_NUM_HARD_LOCATIONS = 1250
-HASH_TABLE_SIZE =  12043 # 25033 #12043  #Must be a prime number in the OpenCL code
+HASH_TABLE_SIZE =  25033 #12043  #Must be a prime number in the OpenCL code
 
 # HASH_TABLE_SIZE must be prime.  The higher it is, the more bandwidth, but way less collisions.
 
@@ -94,14 +94,10 @@ def Get_Active_Locations(bitstring, ctx):
 
 
 
-
-
-
-
-
 bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
 distances_gpu = Get_Distances_GPU_Buffer(ctx)
+
 
 
 OpenCL_code = Get_Text_code ('GPU_Code_OpenCLv1_2.cl')
@@ -159,9 +155,9 @@ time_elapsed = (time.time()-start)
 
 mean  = Results[Results !=0].mean()
 
-print Results[Results !=0].min(), " the minimum of HLs found should be 980"
-print mean, "the mean of HLs found should be 1094.7665"
-print Results[Results !=0].max(), "the max of HLs found should be 1220"
+print Results[Results !=0].min(), " the minimum of HLs found should be 1001"
+print mean, "the mean of HLs found should be 1119.077"
+print Results[Results !=0].max(), "the max of HLs found should be 1249"
 
 
 print numpy.size(hash_table_active_index)
