@@ -83,7 +83,7 @@ __kernel void compute_hammings_hard_locations_256bits(__global ulong4 *HL_addres
 }
 
 /* Implement full read & write to Hard_locations
-/* try pragma unroll here
+ try pragma unroll here
 
 inline int bs_bit(bitstring* a, int bit) {
   int i = bit/64, j = bit%64;
