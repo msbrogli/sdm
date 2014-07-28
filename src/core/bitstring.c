@@ -5,8 +5,6 @@
 
 #include "bitstring.h"
 
-//#define BS_DEBUG
-
 // Number of dimension in our memory space.
 unsigned int bs_dimension = 1000;
 
@@ -118,7 +116,7 @@ bitstring* bs_init_adder(bitstring* a, adder_t *adder) {
 	return a;
 }
 
-inline unsigned int bs_distance(bitstring* a, bitstring* b) {
+unsigned int bs_distance(bitstring* a, bitstring* b) {
 	register unsigned int i;
 	//register unsigned int j;
 	unsigned int dist;
@@ -131,16 +129,21 @@ inline unsigned int bs_distance(bitstring* a, bitstring* b) {
 
 		// optimizing!
 		// take care when chaning BS_TABLE_SIZE or bitstring!
-		dist += bs_table[c&0xffff] + bs_table[(c>>16)&0xffff] + bs_table[(c>>32)&0xffff] + bs_table[(c>>48)&0xffff];
+		// 16 bits table
+		//dist += bs_table[c&0xffff] + bs_table[(c>>16)&0xffff] + bs_table[(c>>32)&0xffff] + bs_table[(c>>48)&0xffff];
+		// 8 bits table
+		dist += bs_table[c&0xff] + bs_table[(c>>8)&0xff] + bs_table[(c>>16)&0xff] + bs_table[(c>>24)&0xff] + 
+				bs_table[(c>>32)&0xff] + bs_table[(c>>40)&0xff] + bs_table[(c>>48)&0xff] + bs_table[(c>>56)&0xff];
 
 		//for(j=0; j<n; j++) {
-		//	dist += bs_table[(c>>(j*BS_TABLE_SIZE))&0xffff];
+		//	dist += bs_table[(c>>(j*BS_TABLE_SIZE))&0xff];
 		//}
 	}
 	return dist;
 }
 
-inline int bs_bit(bitstring* a, int bit) {
+// TODO Make it an inline function. [msbrogli 2014-02-01]
+int bs_bit(bitstring* a, int bit) {
 	int i = bit/64, j = bit%64;
 	return (a[bs_len-1-i]&((uint64_t)1<<j) ? 1 : 0);
 }
@@ -174,7 +177,6 @@ void bs_string(bitstring* a, char* str) {
 void bs_bitrandomswap(bitstring* a, int qty) {
 	unsigned int i, x, counter, arr[qty];
 	counter = 0;
-	assert(qty <= bs_dimension);
 	while(counter < qty) {
 		x = rand() % bs_dimension;
 		for(i=0; i<counter; i++) {
