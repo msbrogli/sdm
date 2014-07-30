@@ -79,10 +79,6 @@ __kernel void get_active_hard_locations(__global ulong4 *HL_address, __global ul
   }
 }
 
-<<<<<<< HEAD
-
-=======
->>>>>>> FETCH_HEAD
 __kernel void clear_bin_active_indexes_gpu(__global uint *bin_active_index_gpu)
 {
   __private uint gid;

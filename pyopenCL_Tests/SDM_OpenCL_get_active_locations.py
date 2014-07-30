@@ -93,16 +93,11 @@ def Get_Active_Locations(bitstring, ctx):
 
 
 
-<<<<<<< HEAD:pyopenCL_Tests/SDM_OpenCL_7Jun14_Copy_If.py
-bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
-=======
 
-
-
-
+#bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 
 bin_active_index_gpu = Get_Hash_Table_GPU_Buffer(ctx)
->>>>>>> FETCH_HEAD:pyopenCL_Tests/SDM_OpenCL_get_active_locations.py
+
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
 distances_gpu = Get_Distances_GPU_Buffer(ctx)
 
