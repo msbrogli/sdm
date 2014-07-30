@@ -94,13 +94,13 @@ def Get_Active_Locations(bitstring, ctx):
 
 
 
-
-
-
+#bin_active_index_gpu = Get_Bin_Active_Indexes_GPU_Buffer(ctx)
 
 bin_active_index_gpu = Get_Hash_Table_GPU_Buffer(ctx)
+
 memory_addresses_gpu = Get_Memory_Addresses_Buffer(ctx)
 distances_gpu = Get_Distances_GPU_Buffer(ctx)
+
 
 
 OpenCL_code = Get_Text_code ('GPU_Code_OpenCLv1_2.cl')
@@ -157,9 +157,9 @@ time_elapsed = (time.time()-start)
 
 mean  = Results[Results !=0].mean()
 
-print Results[Results !=0].min(), " the minimum of HLs found should be 980"
-print mean, "the mean of HLs found should be 1094.7665"
-print Results[Results !=0].max(), "the max of HLs found should be 1220"
+print Results[Results !=0].min(), " the minimum of HLs found should be 1001"
+print mean, "the mean of HLs found should be 1119.077"
+print Results[Results !=0].max(), "the max of HLs found should be 1249"
 
 
 print numpy.size(hash_table_active_index)

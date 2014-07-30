@@ -10,6 +10,21 @@
 #define HASH_TABLE_SIZE6 25028
 #define HASH_TABLE_SIZE7 25027
 
+
+/*
+
+
+#define HASH_TABLE_SIZE 48781
+#define HASH_TABLE_SIZE2 48780
+#define HASH_TABLE_SIZE3 48779
+#define HASH_TABLE_SIZE4 48778
+#define HASH_TABLE_SIZE5 48777
+#define HASH_TABLE_SIZE6 48776
+#define HASH_TABLE_SIZE7 48775
+*/
+
+
+
 /*
 #define HASH_TABLE_SIZE 12043
 #define HASH_TABLE_SIZE2 12042
@@ -19,6 +34,8 @@
 #define HASH_TABLE_SIZE6 12038
 #define HASH_TABLE_SIZE7 12037
 */
+
+
 // HASH_TABLE_SIZE must be prime.  The higher it is, the more bandwidth, but less collisions.  It should also be "far" from a power of 2. 
 
 #define ACCESS_RADIUS_THRESHOLD 104
