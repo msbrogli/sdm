@@ -15,3 +15,31 @@ syntax: glob
 .swo
 *.pyc
 *.pyo
+
+# Files generated after make
+.dirstamp
+.libs
+tests/
+main
+
+# Autotools auto-generated files
+.deps/
+autom4te.cache/
+m4/
+Makefile
+Makefile.in
+config.h.in
+config.h
+aclocal.m4
+config.guess
+config.log
+config.status
+config.sub
+configure
+depcomp
+install-sh
+libtool
+ltmain.sh
+missing
+python/.dirstamp
+stamp-h1

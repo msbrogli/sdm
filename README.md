@@ -10,10 +10,50 @@ What is it for?
 
 To do.
 
+How to install?
+---------------
+
+You need GNU autotools installed in your computer. Then run the following commands:
+
+    ./autogen.sh
+	./configure
+	make
+
+The Python wrapper is in `python/` directory.
+
+
+
+Where to start?
+--------------------
+
+The supplemental_data.pdf holds:
+
+
+i) An introduction to the computational methods available in https://github.com/msbrogli/sdm;    
+ii) A large set of additional heatmaps, documenting the critical distance behavior of the model in a 1000-dimensional memory;    
+iii) The same tests on 256-dimensional memory,    
+iv) all rehearsal results for 256-dimensional memory, and    
+v) the same tests for 1000-dimensional memory.    
+
+
 How do I contribute?
 --------------------
 
 Just fork it and do the usual pull request dance. :)
+
+
+Where to start?
+--------------------
+
+The supplemental_data.pdf holds:
+
+
+i) An introduction to the computational methods available in https://github.com/msbrogli/sdm; 
+ii) A large set of additional heatmaps, documenting the critical distance behavior of the model in a 1000-dimensional memory; 
+iii) The same tests on 256-dimensional memory, 
+iv) all rehearsal results for 256-dimensional memory, and 
+v) the same tests for 1000-dimensional memory.
+
 
 Authors
 -------
