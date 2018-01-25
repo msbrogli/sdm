@@ -1,6 +1,8 @@
 Sparse Distributed Memory
 =========================
 
+## We have been working on a new implementation of SDM. It is available at [https://github.com/msbrogli/sdm-framework]. ##
+
 This is an implementation of SDM created by Pentti Kanerva in 1988. SDM is a mathematical model that has some cognitive properties.
 
 It was used to make simulations in my master thesis oriented by Ph.D. Alexandre Linhares. I would like to thanks him and M.Sc. Daniel Chada for their friendship and all their contributions to my thesis.
